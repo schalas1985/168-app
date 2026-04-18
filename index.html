@@ -6,6 +6,55 @@
 <title>compass</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
+/*
+╔══════════════════════════════════════════════════════════════╗
+║  COMPASS DESIGN SYSTEM — v7                                  ║
+║  Reference this block for every UI change. Never deviate.    ║
+╠══════════════════════════════════════════════════════════════╣
+║  COLOUR TOKENS                                               ║
+║  --bg          #F7F5F0   Page background (warm white)        ║
+║  --surface     #FFFFFF   Card / panel background             ║
+║  --surface2    #F0EDE6   Input / secondary surface           ║
+║  --surface3    #E8E4DA   Hover / tertiary surface            ║
+║  --ink         #1A1916   Primary text                        ║
+║  --ink2        #6B6760   Secondary text                      ║
+║  --ink3        #A8A49E   Placeholder / label text            ║
+║  --ink4        #D3CFC6   Dividers / disabled                 ║
+║  --accent      #2D6A4F   Primary action (forest green)       ║
+║  --accent2     #D8EDE4   Accent background tint              ║
+║  --accent3     rgba(45,106,79,0.08)  Subtle accent fill      ║
+║  --gold        #8A6A1A   Warning / secondary action          ║
+║  --gold2       #FDF3DC   Gold background tint                ║
+║  --warm        #9A3D1A   Destructive / alert                 ║
+║  --warm2       #FDEEE8   Warm background tint                ║
+║  --blue        #1A5F8A   Info / link                         ║
+║  --blue2       #E6F1FB   Blue background tint                ║
+║  --purple      #5A3F9A   Tag / special                       ║
+║  --purple2     #EEE8FB   Purple background tint              ║
+║  --border      rgba(26,25,22,0.10)   Standard border         ║
+║  --border2     rgba(26,25,22,0.05)   Subtle border           ║
+╠══════════════════════════════════════════════════════════════╣
+║  TYPOGRAPHY                                                  ║
+║  Display  Cormorant Garamond 300/400/600  --font-d           ║
+║  Body     Jost 300/400/500               --font-b           ║
+║  Sizes    10px label · 11px meta · 12px small · 13px body   ║
+║           14px default · 16-20px display headings           ║
+╠══════════════════════════════════════════════════════════════╣
+║  SPACING  4/8/10/12/14/16/18/20/24px                        ║
+║  RADIUS   --radius 16px  --radius-sm 10px                   ║
+╠══════════════════════════════════════════════════════════════╣
+║  COMPONENTS                                                  ║
+║  .card          White surface, border, 18px pad, 16px radius ║
+║  .card-dim      surface2 background, subtle border           ║
+║  .btn-primary   accent bg, white text, full width default    ║
+║  .btn-ghost     transparent, border, ink3 text               ║
+║  .field         surface2 bg, border, focus → accent border   ║
+║  .slabel        10px uppercase label, centered, ink3         ║
+║  .nav-btn       12px, border-bottom active indicator         ║
+║  .inner-tab     pill shape, active = ink bg white text       ║
+║  .tag-chip      colour-tinted pill, value colour             ║
+╚══════════════════════════════════════════════════════════════╝
+*/
 *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
 :root {
   --bg:#F7F5F0; --surface:#FFFFFF; --surface2:#F0EDE6; --surface3:#E8E4DA;
@@ -312,14 +361,6 @@ input.field { height:42px; }
 .now-line-dot { width:8px; height:8px; border-radius:50%; background:#E24B4A; position:absolute; left:-4px; top:-3px; }
 .add-event-hint { font-size:9px; color:var(--ink3); padding:2px 4px; opacity:0; transition:opacity 0.15s; }
 .wt-cell:hover .add-event-hint { opacity:1; }
-.event-block[draggable="true"] { cursor:grab; }
-.event-block[draggable="true"]:active { cursor:grabbing; opacity:0.7; }
-.event-block.dragging { opacity:0.4; border:2px dashed currentColor; }
-.wt-cell.drag-over { background:var(--accent2); border:1px dashed var(--accent); }
-/* 30-min cell halves */
-.wt-cell { position:relative; }
-.wt-half-bottom { position:absolute; bottom:0; left:0; right:0; height:50%; cursor:pointer; }
-.wt-half-bottom:hover::after { content:":30"; position:absolute; bottom:2px; left:4px; font-size:9px; color:var(--ink3); }
 @media (min-width:700px) { .week-split { flex-direction:row-reverse; align-items:flex-start; } .week-main { flex:0 0 65%; } .week-side { flex:0 0 calc(35% - 14px); } }
 .week-main { min-width:0; }
 .week-side { min-width:0; }
@@ -574,36 +615,29 @@ input.field { height:42px; }
         <div style="font-size:11px;color:#6b4e12;font-weight:300;">Block your week now. Set your intent. What does a good week look like?</div>
       </div>
     </div>
-    <!-- WEEK HEADER ROW 1: title + nav slider -->
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-shrink:0;">
-      <button class="cal-nav" onclick="weekShift(-1)">‹</button>
-      <span id="weekRangeTitle" style="font-family:var(--font-d);font-size:17px;font-weight:300;color:var(--ink);flex:1;text-align:center;white-space:nowrap;"></span>
-      <button class="cal-nav" onclick="weekShift(1)">›</button>
-    </div>
-    <!-- WEEK HEADER ROW 2: Up Next left | Pie centre | Dropdown right -->
-    <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:8px;flex-shrink:0;">
-
-      <!-- LEFT: Up Next -->
-      <div style="flex:1;min-width:0;">
-        <div style="font-size:9px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:6px;">Up next</div>
-        <div id="unbookedList" style="font-size:12px;"></div>
+    <!-- TOP ROW: nav + toggles + panels -->
+    <div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:8px;flex-shrink:0;flex-wrap:wrap;">
+      <!-- Nav and toggles -->
+      <div style="display:flex;align-items:center;gap:7px;">
+        <button class="cal-nav" onclick="weekShift(-1)">‹</button>
+        <span id="weekRangeTitle" style="font-family:var(--font-d);font-size:15px;font-weight:300;color:var(--ink);white-space:nowrap;"></span>
+        <button class="cal-nav" onclick="weekShift(1)">›</button>
+        <div class="week-view-opts" style="margin-left:6px;">
+          <button class="wv-opt on" id="wvWeek" onclick="setWeekView('week',this)">Week</button>
+          <button class="wv-opt" id="wvMonth" onclick="setWeekView('month',this)">Month</button>
+        </div>
       </div>
-
-      <!-- CENTRE: Values pie -->
-      <div style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;">
-        <div style="font-size:9px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:6px;">Time by value</div>
-        <canvas id="valuePieChart" width="120" height="120"></canvas>
+      <!-- Value pie + Up next — compact side by side -->
+      <div style="display:flex;gap:8px;flex:1;min-width:0;">
+        <div style="flex:0 0 auto;">
+          <div style="font-size:9px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:4px;">By value</div>
+          <canvas id="valuePieChart" width="80" height="80"></canvas>
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:9px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:4px;">Up next</div>
+          <div id="unbookedList" style="font-size:11px;color:var(--ink2);"></div>
+        </div>
       </div>
-
-      <!-- RIGHT: View dropdown -->
-      <div style="flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;padding-top:0;">
-        <div style="font-size:9px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:6px;">View</div>
-        <select id="weekViewSelect" onchange="setWeekViewFromSelect(this.value)" style="height:32px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface2);font-size:12px;font-family:var(--font-b);color:var(--ink2);padding:0 8px;outline:none;cursor:pointer;">
-          <option value="week">Week</option>
-          <option value="month">Month</option>
-        </select>
-      </div>
-
     </div>
 
     <!-- WEEK GRID fills remaining space -->
@@ -893,43 +927,28 @@ input.field { height:42px; }
     <div style="font-family:var(--font-d);font-size:18px;font-weight:300;margin-bottom:14px;" id="tbModalTitle">Block time</div>
     <div class="form-row" style="margin-bottom:10px;"><div class="form-label">Label</div><input class="field" id="tbLabel" placeholder="e.g. Sleep, Dancing, Deep work"></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
-      <div>
-        <div class="form-label">Start time</div>
-        <select class="field" id="tbMinute" style="height:42px;">
-          <option value="0" selected>:00</option>
-          <option value="30">:30</option>
-        </select>
-      </div>
-      <div>
-        <div class="form-label">Duration</div>
+      <div><div class="form-label">Duration (hours)</div>
         <select class="field" id="tbDuration" style="height:42px;">
-          <option value="0.25">15 min</option>
           <option value="0.5">30 min</option>
-          <option value="0.75">45 min</option>
           <option value="1" selected>1 hour</option>
           <option value="1.5">1.5 hours</option>
           <option value="2">2 hours</option>
-          <option value="2.5">2.5 hours</option>
           <option value="3">3 hours</option>
           <option value="4">4 hours</option>
           <option value="6">6 hours</option>
           <option value="8">8 hours</option>
         </select>
       </div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
-      <div>
-        <div class="form-label">Domain tag</div>
+      <div><div class="form-label">Domain tag</div>
         <select class="field" id="tbDomain" style="height:42px;">
           <option value="">None</option>
         </select>
       </div>
-      <div>
-        <div class="form-label">Value tag</div>
-        <select class="field" id="tbValue" style="height:42px;">
-          <option value="">None</option>
-        </select>
-      </div>
+    </div>
+    <div class="form-row" style="margin-bottom:14px;"><div class="form-label">Value tag (optional)</div>
+      <select class="field" id="tbValue" style="height:42px;">
+        <option value="">None</option>
+      </select>
     </div>
     <input type="hidden" id="tbDate">
     <input type="hidden" id="tbHour">
@@ -1021,7 +1040,7 @@ input.field { height:42px; }
     </div>
     <div class="pp-section">
       <div class="pp-section-title">About</div>
-      <p style="font-size:12px;color:var(--ink3);font-weight:300;line-height:1.6;margin-bottom:10px;">Compass v7b personal web app.<br>Your data is stored locally in your browser.</p>
+      <p style="font-size:12px;color:var(--ink3);font-weight:300;line-height:1.6;margin-bottom:10px;">Compass v7 personal web app.<br>Your data is stored locally in your browser.</p>
       <button onclick="showDataDiag()" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:var(--radius-sm);background:transparent;font-size:12px;color:var(--ink3);cursor:pointer;font-family:var(--font-b);margin-bottom:5px;">View data status</button>
       <button onclick="forceMigration()" style="width:100%;padding:8px;border:1px solid rgba(45,106,79,0.3);border-radius:var(--radius-sm);background:var(--accent3);font-size:12px;color:var(--accent);cursor:pointer;font-family:var(--font-b);">Re-run data recovery</button>
       <div id="dataDiag" style="display:none;margin-top:10px;font-size:11px;color:var(--ink3);line-height:1.8;font-weight:300;"></div>
@@ -1169,9 +1188,14 @@ function switchInner(panelId){
 // ══ WEATHER ══
 async function fetchWeather(){
   const loc=S.profile?.location||'Cape Town';
-  try{ const r=await fetch(`https://wttr.in/${encodeURIComponent(loc)}?format=%c+%t`);
+  try{
+    const r=await fetch(`https://wttr.in/${encodeURIComponent(loc)}?format=%c+%t`);
     const t=await r.text();
-    document.getElementById('topWeather').textContent=t.trim()?`· ${t.trim()}`:'';
+    // Guard: if response looks like HTML or is longer than 20 chars, ignore it
+    const clean=t.trim();
+    if(clean && !clean.startsWith('<') && clean.length < 20){
+      document.getElementById('topWeather').textContent=`· ${clean}`;
+    }
   }catch(e){}
 }
 
@@ -1600,16 +1624,14 @@ function addToFromInbox(id){
 // renderUnbooked defined below
 
 // ══ TIME BLOCKS ══
-function openTimeBlockModal(ds, hour, minute){
-  minute = minute||0;
+function openTimeBlockModal(ds, hour){
   document.getElementById('tbDate').value = ds;
   document.getElementById('tbHour').value = hour;
   document.getElementById('tbEditId').value = '';
   document.getElementById('tbLabel').value = '';
   document.getElementById('tbDuration').value = '1';
-  if(document.getElementById('tbMinute')) document.getElementById('tbMinute').value = minute;
   document.getElementById('tbDeleteBtn').style.display = 'none';
-  document.getElementById('tbModalTitle').textContent = `Block time — ${fmtDate(ds)} ${String(hour).padStart(2,'0')}:${minute===30?'30':'00'}`;
+  document.getElementById('tbModalTitle').textContent = `Block time — ${fmtDate(ds)} ${String(hour).padStart(2,'0')}:00`;
   // Populate value and domain dropdowns
   const vSel = document.getElementById('tbValue');
   vSel.innerHTML = '<option value="">None</option>' + S.values.map(v=>`<option value="${esc(v.name)}">${esc(v.tag||v.name)}</option>`).join('');
@@ -1625,7 +1647,6 @@ function editTimeBlock(id){
   document.getElementById('tbEditId').value = id;
   document.getElementById('tbLabel').value = b.label||'';
   document.getElementById('tbDuration').value = b.duration||1;
-  if(document.getElementById('tbMinute')) document.getElementById('tbMinute').value = b.minute||0;
   document.getElementById('tbValue').value = b.valueTag||'';
   document.getElementById('tbDomain').value = b.domain||'';
   document.getElementById('tbDeleteBtn').style.display = 'block';
@@ -1636,7 +1657,6 @@ function saveTimeBlock(){
   if(!label){ toast('Give this block a label'); return; }
   const ds    = document.getElementById('tbDate').value;
   const hour  = parseInt(document.getElementById('tbHour').value);
-  const minute= parseInt(document.getElementById('tbMinute')?.value||0);
   const dur   = parseFloat(document.getElementById('tbDuration').value)||1;
   const valTag = document.getElementById('tbValue').value;
   const domain = document.getElementById('tbDomain').value;
@@ -1644,9 +1664,9 @@ function saveTimeBlock(){
   if(!S.timeBlocks) S.timeBlocks=[];
   if(editId){
     const b = S.timeBlocks.find(t=>t.id===editId);
-    if(b) Object.assign(b,{label,duration:dur,minute,valueTag:valTag,domain});
+    if(b) Object.assign(b,{label,duration:dur,valueTag:valTag,domain});
   } else {
-    S.timeBlocks.push({id:Date.now(),date:ds,hour,minute:minute||0,duration:dur,label,valueTag:valTag,domain,created:new Date().toISOString()});
+    S.timeBlocks.push({id:Date.now(),date:ds,hour,duration:dur,label,valueTag:valTag,domain,created:new Date().toISOString()});
   }
   sv(); closeTimeBlockModal(); renderWeekGrid(); toast('Block saved');
 }
@@ -1665,41 +1685,6 @@ function openTimeBlockFromUnbooked(id){
   openTimeBlockModal(ds, getDayStart());
   document.getElementById('tbLabel').value = item.text;
   if(item.valueTag) document.getElementById('tbValue').value = item.valueTag;
-}
-
-
-// ══ DRAG AND DROP TIME BLOCKS ══
-let _dragBlockId = null;
-function dragBlockStart(e, id){
-  _dragBlockId = id;
-  e.target.classList.add('dragging');
-  e.dataTransfer.effectAllowed = 'move';
-}
-function dragBlockEnd(e){
-  e.target.classList.remove('dragging');
-  document.querySelectorAll('.wt-cell.drag-over').forEach(c=>c.classList.remove('drag-over'));
-  _dragBlockId = null;
-}
-function dragOver(e){
-  e.preventDefault();
-  e.dataTransfer.dropEffect = 'move';
-  e.currentTarget.classList.add('drag-over');
-}
-function dragLeave(e){
-  e.currentTarget.classList.remove('drag-over');
-}
-function dropBlock(e, ds, hour){
-  e.preventDefault();
-  e.currentTarget.classList.remove('drag-over');
-  if(!_dragBlockId) return;
-  const b = (S.timeBlocks||[]).find(t=>t.id===_dragBlockId);
-  if(!b) return;
-  // Detect if dropped in bottom half (30 min)
-  const rect = e.currentTarget.getBoundingClientRect();
-  const relY = e.clientY - rect.top;
-  const minute = relY > rect.height / 2 ? 30 : 0;
-  b.date = ds; b.hour = hour; b.minute = minute;
-  sv(); renderWeekGrid(); toast(`Moved to ${String(hour).padStart(2,'0')}:${minute===30?'30':'00'}`);
 }
 
 // ══ THIS WEEK BY VALUE — DONUT CHART ══
@@ -1951,12 +1936,11 @@ function cycleStatus(i){
 }
 function sendUpNextToWeek(i){
   const p=S.projects[i]; if(!p||!p.upNext) return;
-  if(!S.upNextQueue) S.upNextQueue=[];
-  const exists=S.upNextQueue.find(x=>x.text===p.upNext&&x.projectRef===p.name);
+  // Add as an action item in inbox with a project link — will show in Week unbooked
+  const exists=S.inbox.find(x=>x.text===p.upNext&&x.projectRef===p.name);
   if(exists){toast('Already in your week queue');return;}
-  S.upNextQueue.push({id:'un'+Date.now(),text:p.upNext,projectRef:p.name,ts:Date.now()});
-  localStorage.setItem('cp_upnext',JSON.stringify(S.upNextQueue));
-  renderUnbooked(); toast('Sent to Week — Up Next');
+  S.inbox.push({text:p.upNext,id:Date.now(),type:'action',date:todayKey(),projectRef:p.name,ts:Date.now()});
+  sv(); renderInbox(); renderUnbooked(); toast('Added to Week queue');
 }
 function deleteProject(i){ if(confirm('Delete this project?')){ S.projects.splice(i,1); sv(); renderProjects(); } }
 function editProject(i){ S._editProjIdx=i; showProjForm(S.projects[i]); }
@@ -2291,14 +2275,7 @@ function getHours(){ const s=getDayStart(); return Array.from({length:24},(_,i)=
 function setWeekView(v, el){
   _weekView = v;
   document.querySelectorAll('.wv-opt').forEach(b=>b.classList.remove('on'));
-  if(el) el.classList.add('on');
-  document.getElementById('weekGridWrap').style.display  = v==='week' ? 'block' : 'none';
-  document.getElementById('monthGridWrap').style.display = v==='month' ? 'block' : 'none';
-  if(v==='week') renderWeekGrid();
-  else renderMonth();
-}
-function setWeekViewFromSelect(v){
-  _weekView = v;
+  el.classList.add('on');
   document.getElementById('weekGridWrap').style.display  = v==='week' ? 'block' : 'none';
   document.getElementById('monthGridWrap').style.display = v==='month' ? 'block' : 'none';
   if(v==='week') renderWeekGrid();
@@ -2321,12 +2298,7 @@ function renderWeekGrid(){
   const monday = getWeekMonday(S.calDate);
   const days = Array.from({length:7}, (_,i)=>{ const d=new Date(monday); d.setDate(monday.getDate()+i); return d; });
   const fmt = d => `${d.getDate()} ${MONTHS[d.getMonth()].slice(0,3)}`;
-  // Week number
-  const jan1=new Date(days[0].getFullYear(),0,1);
-  const wkNum=Math.ceil(((days[0]-jan1)/86400000+jan1.getDay()+1)/7);
-  const mo=days[0].toLocaleString('en-ZA',{month:'long'});
-  const yr=days[0].getFullYear();
-  document.getElementById('weekRangeTitle').textContent = `Week ${wkNum} · ${mo} ${yr}`;
+  document.getElementById('weekRangeTitle').textContent = `${fmt(days[0])} — ${fmt(days[6])}`;
 
   const todayStr = todayKey();
   const nowHour = new Date().getHours();
@@ -2372,13 +2344,8 @@ function renderWeekGrid(){
         const col = val ? val.color : '#888780';
         eventBlocks += `<div class="event-block" style="background:${col}22;color:${col};top:3px;height:${Math.max(19,(b.duration||1)*46-4)}px;cursor:pointer;" onclick="event.stopPropagation();editTimeBlock(${b.id})">${esc(b.label||'Block')}${b.domain?' · '+esc(b.domain):''}</div>`;
       });
-      // 30-min click zones
-      const cellClick30 = `onclick="openTimeBlockModal('${ds}',${hour},0)"`;
-      const cell30bottom = `<div class="wt-half-bottom" onclick="event.stopPropagation();openTimeBlockModal('${ds}',${hour},30)"></div>`;
-      rowsHTML += `<div class="wt-cell ${isToday?'today-col':''}" data-date="${ds}" data-hour="${hour}"
-        ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropBlock(event,'${ds}',${hour})"
-        onclick="openTimeBlockModal('${ds}',${hour},0)">
-        <div class="wt-half"></div>${nowLine}${eventBlocks}${cell30bottom}
+      rowsHTML += `<div class="wt-cell ${isToday?'today-col':''}" data-date="${ds}" data-hour="${hour}" onclick="openTimeBlockModal('${ds}',${hour})">
+        <div class="wt-half"></div>${nowLine}${eventBlocks}
         <span class="add-event-hint">+</span>
       </div>`;
     });
@@ -2501,12 +2468,12 @@ function renderWeekValSummary(){
   const we=S.entries.filter(e=>{const d=new Date(e.date);return d>=wa&&d<=now;});
   const tagC={}; we.forEach(e=>(e.commits||[]).forEach(c=>{const t=c.tag||c.tags?.[0];if(t)tagC[t]=(tagC[t]||0)+1;}));
   const total=Object.values(tagC).reduce((a,b)=>a+b,0);
-  ctx.clearRect(0,0,120,120);
+  ctx.clearRect(0,0,80,80);
   if(!total){
-    ctx.beginPath(); ctx.arc(60,60,52,0,Math.PI*2);
+    ctx.beginPath(); ctx.arc(40,40,34,0,Math.PI*2);
     ctx.strokeStyle='#D3CFC6'; ctx.lineWidth=2; ctx.stroke();
-    ctx.fillStyle='#A8A49E'; ctx.font='12px sans-serif'; ctx.textAlign='center';
-    ctx.fillText('No data',60,64); return;
+    ctx.fillStyle='#A8A49E'; ctx.font='9px sans-serif'; ctx.textAlign='center';
+    ctx.fillText('No data',40,44); return;
   }
   const sorted=Object.entries(tagC).sort((a,b)=>b[1]-a[1]);
   let angle=-Math.PI/2;
@@ -2515,45 +2482,28 @@ function renderWeekValSummary(){
     const val=S.values.find(v=>v.name===tag);
     const col=val?val.color:'#A8A49E';
     ctx.beginPath(); ctx.moveTo(40,40);
-    ctx.arc(60,60,52,angle,angle+slice);
+    ctx.arc(40,40,34,angle,angle+slice);
     ctx.closePath(); ctx.fillStyle=col; ctx.fill();
     angle+=slice;
   });
   // Centre hole
-  ctx.beginPath(); ctx.arc(60,60,26,0,Math.PI*2);
+  ctx.beginPath(); ctx.arc(40,40,18,0,Math.PI*2);
   ctx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--surface').trim()||'#ffffff';
   ctx.fill();
 }
 
 function renderUnbooked(){
   const list=document.getElementById('unbookedList'); if(!list) return;
-  // Up Next = ONLY items explicitly sent from project/area/resource cards via sendUpNextToWeek
-  const upNextItems=(S.upNextQueue||[]).sort((a,b)=>(a.ts||0)-(b.ts||0));
-  if(!upNextItems.length){
-    list.innerHTML=`<div style="font-size:11px;color:var(--ink3);font-style:italic;line-height:1.5;">Nothing yet.<br>Use "Send Up Next to Week" on a project card.</div>`;
-    return;
-  }
-  list.innerHTML=upNextItems.slice(0,8).map(item=>{
-    const proj=item.projectRef?`<span style="font-size:10px;color:var(--blue);display:block;margin-top:1px;">${esc(item.projectRef)}</span>`:'';
-    return`<div style="padding:6px 0;border-bottom:1px solid var(--border2);display:flex;align-items:flex-start;gap:6px;cursor:pointer;" onclick="openTimeBlockFromUpNext('${item.id}')" title="Click to block time for this">
-      <div style="flex:1;min-width:0;">
-        <div style="font-size:12px;color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(item.text)}</div>
-        ${proj}
-      </div>
-      <button onclick="event.stopPropagation();removeUpNext('${item.id}')" style="flex-shrink:0;background:none;border:none;color:var(--ink3);cursor:pointer;font-size:12px;padding:0 2px;" title="Remove">✕</button>
+  // Up next = action-type inbox items ordered by recorded time
+  const actions=S.inbox.filter(i=>i.type==='action'||i.type==='todo').sort((a,b)=>(a.ts||0)-(b.ts||0));
+  if(!actions.length){list.innerHTML=`<span style="color:var(--ink3);">Nothing yet</span>`;return;}
+  list.innerHTML=actions.slice(0,8).map(item=>{
+    const proj=item.projectRef?`<span style="font-size:10px;color:var(--blue);margin-left:4px;">${esc(item.projectRef)}</span>`:'';
+    return`<div style="padding:5px 0;border-bottom:1px solid var(--border2);display:flex;align-items:center;gap:5px;cursor:pointer;" onclick="openTimeBlockFromUnbooked(${item.id})" title="Click to block time">
+      <span style="flex:1;font-size:12px;color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(item.text)}</span>${proj}
+      <span style="font-size:10px;color:var(--ink3);flex-shrink:0;">+ block</span>
     </div>`;
-  }).join('')+(upNextItems.length>8?`<div style="font-size:10px;color:var(--ink3);padding-top:3px;">+${upNextItems.length-8} more</div>`:'');
-}
-function openTimeBlockFromUpNext(id){
-  const item=(S.upNextQueue||[]).find(i=>i.id===id); if(!item) return;
-  const ds=todayKey();
-  openTimeBlockModal(ds, getDayStart());
-  document.getElementById('tbLabel').value=item.text;
-}
-function removeUpNext(id){
-  S.upNextQueue=(S.upNextQueue||[]).filter(i=>i.id!==id);
-  localStorage.setItem('cp_upnext',JSON.stringify(S.upNextQueue));
-  renderUnbooked(); toast('Removed from Up Next');
+  }).join('')+(actions.length>8?`<div style="font-size:10px;color:var(--ink3);padding-top:3px;">+${actions.length-8} more</div>`:'');
 }
 
 // ══ INSIGHTS ══
