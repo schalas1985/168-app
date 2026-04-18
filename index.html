@@ -580,21 +580,31 @@ input.field { height:42px; }
       <span id="weekRangeTitle" style="font-family:var(--font-d);font-size:17px;font-weight:300;color:var(--ink);flex:1;text-align:center;white-space:nowrap;"></span>
       <button class="cal-nav" onclick="weekShift(1)">›</button>
     </div>
-    <!-- WEEK HEADER ROW 2: pie centred + view dropdown right -->
-    <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;flex-shrink:0;">
-      <div style="flex-shrink:0;width:110px;"></div>
-      <div style="flex:1;display:flex;flex-direction:column;align-items:center;">
-        <div style="font-size:9px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:6px;">Time by value</div>
-        <canvas id="valuePieChart" width="160" height="160"></canvas>
+    <!-- WEEK HEADER ROW 2: Up Next left | Pie centre | Dropdown right -->
+    <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:8px;flex-shrink:0;">
+
+      <!-- LEFT: Up Next -->
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:9px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:6px;">Up next</div>
+        <div id="unbookedList" style="font-size:12px;"></div>
       </div>
-      <div style="flex-shrink:0;width:110px;display:flex;justify-content:flex-end;padding-top:4px;">
+
+      <!-- CENTRE: Values pie -->
+      <div style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;">
+        <div style="font-size:9px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:6px;">Time by value</div>
+        <canvas id="valuePieChart" width="120" height="120"></canvas>
+      </div>
+
+      <!-- RIGHT: View dropdown -->
+      <div style="flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;padding-top:0;">
+        <div style="font-size:9px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:6px;">View</div>
         <select id="weekViewSelect" onchange="setWeekViewFromSelect(this.value)" style="height:32px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface2);font-size:12px;font-family:var(--font-b);color:var(--ink2);padding:0 8px;outline:none;cursor:pointer;">
           <option value="week">Week</option>
           <option value="month">Month</option>
         </select>
       </div>
+
     </div>
-    <div id="unbookedList" style="display:none;"></div>
 
     <!-- WEEK GRID fills remaining space -->
     <div id="weekGridWrap" style="flex:1;min-height:0;display:flex;flex-direction:column;"><!-- rendered by JS --></div>
@@ -882,14 +892,16 @@ input.field { height:42px; }
   <div style="background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);padding:20px;width:100%;max-width:360px;">
     <div style="font-family:var(--font-d);font-size:18px;font-weight:300;margin-bottom:14px;" id="tbModalTitle">Block time</div>
     <div class="form-row" style="margin-bottom:10px;"><div class="form-label">Label</div><input class="field" id="tbLabel" placeholder="e.g. Sleep, Dancing, Deep work"></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px;">
-      <div><div class="form-label">Start time</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+      <div>
+        <div class="form-label">Start time</div>
         <select class="field" id="tbMinute" style="height:42px;">
           <option value="0" selected>:00</option>
           <option value="30">:30</option>
         </select>
       </div>
-      <div><div class="form-label">Duration</div>
+      <div>
+        <div class="form-label">Duration</div>
         <select class="field" id="tbDuration" style="height:42px;">
           <option value="0.25">15 min</option>
           <option value="0.5">30 min</option>
@@ -904,17 +916,20 @@ input.field { height:42px; }
           <option value="8">8 hours</option>
         </select>
       </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+      <div>
+        <div class="form-label">Domain tag</div>
+        <select class="field" id="tbDomain" style="height:42px;">
+          <option value="">None</option>
+        </select>
       </div>
-    </div>
-    <div style="margin-bottom:10px;"><div class="form-label">Domain tag</div>
-      <select class="field" id="tbDomain" style="height:42px;">
-        <option value="">None</option>
-      </select>
-    </div>
-    <div class="form-row" style="margin-bottom:14px;"><div class="form-label">Value tag (optional)</div>
-      <select class="field" id="tbValue" style="height:42px;">
-        <option value="">None</option>
-      </select>
+      <div>
+        <div class="form-label">Value tag</div>
+        <select class="field" id="tbValue" style="height:42px;">
+          <option value="">None</option>
+        </select>
+      </div>
     </div>
     <input type="hidden" id="tbDate">
     <input type="hidden" id="tbHour">
@@ -2529,12 +2544,12 @@ function renderWeekValSummary(){
   const we=S.entries.filter(e=>{const d=new Date(e.date);return d>=wa&&d<=now;});
   const tagC={}; we.forEach(e=>(e.commits||[]).forEach(c=>{const t=c.tag||c.tags?.[0];if(t)tagC[t]=(tagC[t]||0)+1;}));
   const total=Object.values(tagC).reduce((a,b)=>a+b,0);
-  ctx.clearRect(0,0,160,160);
+  ctx.clearRect(0,0,120,120);
   if(!total){
-    ctx.beginPath(); ctx.arc(80,80,68,0,Math.PI*2);
+    ctx.beginPath(); ctx.arc(60,60,52,0,Math.PI*2);
     ctx.strokeStyle='#D3CFC6'; ctx.lineWidth=2; ctx.stroke();
     ctx.fillStyle='#A8A49E'; ctx.font='12px sans-serif'; ctx.textAlign='center';
-    ctx.fillText('No data',80,84); return;
+    ctx.fillText('No data',60,64); return;
   }
   const sorted=Object.entries(tagC).sort((a,b)=>b[1]-a[1]);
   let angle=-Math.PI/2;
@@ -2543,12 +2558,12 @@ function renderWeekValSummary(){
     const val=S.values.find(v=>v.name===tag);
     const col=val?val.color:'#A8A49E';
     ctx.beginPath(); ctx.moveTo(40,40);
-    ctx.arc(80,80,68,angle,angle+slice);
+    ctx.arc(60,60,52,angle,angle+slice);
     ctx.closePath(); ctx.fillStyle=col; ctx.fill();
     angle+=slice;
   });
   // Centre hole
-  ctx.beginPath(); ctx.arc(80,80,36,0,Math.PI*2);
+  ctx.beginPath(); ctx.arc(60,60,26,0,Math.PI*2);
   ctx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--surface').trim()||'#ffffff';
   ctx.fill();
 }
