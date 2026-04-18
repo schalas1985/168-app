@@ -1036,7 +1036,9 @@ input.field { height:42px; }
       <div class="pp-menu-item"><div class="pp-menu-icon">🔒</div><span class="pp-menu-label">Security</span><span class="pp-menu-arrow">›</span></div>
       <div class="pp-menu-item"><div class="pp-menu-icon">💳</div><span class="pp-menu-label">Billing</span><span class="pp-menu-arrow">›</span></div>
       <div class="pp-menu-item"><div class="pp-menu-icon">🎨</div><span class="pp-menu-label">Preferences</span><span class="pp-menu-arrow">›</span></div>
-      <div class="pp-menu-item"><div class="pp-menu-icon">📤</div><span class="pp-menu-label">Export my data</span><span class="pp-menu-arrow">›</span></div>
+      <div class="pp-menu-item" onclick="exportData()" style="cursor:pointer;"><div class="pp-menu-icon">📤</div><span class="pp-menu-label">Export my data</span><span class="pp-menu-arrow">›</span></div>
+      <div class="pp-menu-item" onclick="document.getElementById('importFileInput').click()" style="cursor:pointer;"><div class="pp-menu-icon">📥</div><span class="pp-menu-label">Import data</span><span class="pp-menu-arrow">›</span></div>
+      <input type="file" id="importFileInput" accept=".json" style="display:none;" onchange="importData(event)">
     </div>
     <div class="pp-section">
       <div class="pp-section-title">About</div>
@@ -1191,12 +1193,48 @@ async function fetchWeather(){
   try{
     const r=await fetch(`https://wttr.in/${encodeURIComponent(loc)}?format=%c+%t`);
     const t=await r.text();
-    // Guard: if response looks like HTML or is longer than 20 chars, ignore it
     const clean=t.trim();
     if(clean && !clean.startsWith('<') && clean.length < 20){
       document.getElementById('topWeather').textContent=`· ${clean}`;
     }
   }catch(e){}
+}
+
+// ══ EXPORT / IMPORT ══
+function exportData(){
+  const data={
+    cp_entries:S.entries,
+    cp_inbox:S.inbox,
+    cp_projects:S.projects,
+    cp_values:S.values,
+    cp_captures:S.captures,
+    cp_profile:S.profile||{},
+    cp_timeblocks:S.timeBlocks||[],
+    cp_domaintags:S.domainTags||[],
+    cp_trash:S.trash||[]
+  };
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  const date=new Date().toISOString().slice(0,10);
+  a.href=url; a.download=`compass-backup-${date}.json`;
+  a.click(); URL.revokeObjectURL(url);
+  toast('Data exported');
+}
+function importData(e){
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    try{
+      const data=JSON.parse(ev.target.result);
+      const keys=['cp_entries','cp_inbox','cp_projects','cp_values','cp_captures','cp_profile','cp_timeblocks','cp_domaintags','cp_trash'];
+      keys.forEach(k=>{ if(data[k]!==undefined) localStorage.setItem(k,JSON.stringify(data[k])); });
+      toast('Data imported — reloading...');
+      setTimeout(()=>location.reload(),1200);
+    }catch(err){ toast('Import failed — invalid file'); }
+  };
+  reader.readAsText(file);
+  e.target.value='';
 }
 
 // ══ PROFILE ══
