@@ -621,23 +621,23 @@ input.field { height:42px; }
         <!-- WEEK GRID -->
         <div id="weekGridWrap" style="flex:1;min-height:0;display:flex;flex-direction:column;"><!-- rendered by JS --></div>
 
+        <!-- MONTH VIEW (inside center column so it respects 50% width) -->
+        <div id="monthGridWrap" style="display:none;flex:1;overflow-y:auto;">
+          <div class="card" style="padding:14px;">
+            <div class="cal-hdr">
+              <button class="cal-nav" onclick="calShift(-1)">‹</button>
+              <span id="calTitle" class="cal-title"></span>
+              <button class="cal-nav" onclick="calShift(1)">›</button>
+            </div>
+            <div class="cal-grid" id="calGrid"></div>
+          </div>
+          <div id="dayDetail"></div>
+          <div id="monthSchedule" style="margin-top:10px;"></div>
+        </div>
+
       </div><!-- end .week-center -->
 
     </div><!-- end .week-layout -->
-
-    <!-- MONTH FALLBACK -->
-    <div id="monthGridWrap" style="display:none;flex:1;overflow-y:auto;">
-      <div class="card" style="padding:14px;">
-        <div class="cal-hdr">
-          <button class="cal-nav" onclick="calShift(-1)">‹</button>
-          <span id="calTitle" class="cal-title"></span>
-          <button class="cal-nav" onclick="calShift(1)">›</button>
-        </div>
-        <div class="cal-grid" id="calGrid"></div>
-      </div>
-      <div id="dayDetail"></div>
-      <div id="monthSchedule" style="margin-top:10px;"></div>
-    </div>
   </div>
 
   <!-- ═══ MAPS ═══ -->
