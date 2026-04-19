@@ -586,46 +586,40 @@ input.field { height:42px; }
     <!-- WEEK BODY: 25% Up Next | 50% Calendar | 25% Right -->
     <div class="week-layout">
 
-      <!-- LEFT COLUMN: Up Next -->
+      <!-- LEFT COLUMN: pie charts + Up Next -->
       <div class="upnext-col">
+        <div class="week-pie-row">
+          <div class="week-pie-item">
+            <div class="week-pie-label">This week</div>
+            <canvas id="valuePieChart" width="90" height="90"></canvas>
+          </div>
+          <div class="week-pie-item">
+            <div class="week-pie-label">This month</div>
+            <canvas id="valuePieChart2" width="90" height="90"></canvas>
+          </div>
+        </div>
         <div class="upnext-col-title">Up next</div>
         <div id="unbookedList"></div>
       </div>
 
-      <!-- CENTRE COLUMN: pie charts + grid -->
+      <!-- CENTRE COLUMN: controls + grid -->
       <div class="week-center">
 
-        <!-- Pie charts row: left-aligned with calendar -->
-        <div class="week-pie-row">
-          <div class="week-pie-item">
-            <div class="week-pie-label">This week</div>
-            <canvas id="valuePieChart" width="100" height="100"></canvas>
-          </div>
-          <div class="week-pie-item">
-            <div class="week-pie-label">This month</div>
-            <canvas id="valuePieChart2" width="100" height="100"></canvas>
-          </div>
+        <!-- Controls: ‹ title › + dropdown, sitting above the grid -->
+        <div class="week-controls">
+          <button class="cal-nav" onclick="weekShift(-1)">‹</button>
+          <span id="weekRangeTitle" style="font-family:var(--font-d);font-size:16px;font-weight:300;color:var(--ink);flex:1;white-space:nowrap;"></span>
+          <button class="cal-nav" onclick="weekShift(1)">›</button>
+          <select id="weekViewSelect" onchange="setWeekViewFromSelect(this.value)" style="height:30px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface2);font-size:12px;font-family:var(--font-b);color:var(--ink2);padding:0 10px;outline:none;cursor:pointer;">
+            <option value="week">Week</option>
+            <option value="month">Month</option>
+          </select>
         </div>
 
         <!-- WEEK GRID -->
         <div id="weekGridWrap" style="flex:1;min-height:0;display:flex;flex-direction:column;"><!-- rendered by JS --></div>
 
       </div><!-- end .week-center -->
-
-      <!-- RIGHT COLUMN: week nav + view selector -->
-      <div class="week-right">
-        <div class="week-controls">
-          <button class="cal-nav" onclick="weekShift(-1)">‹</button>
-          <span id="weekRangeTitle" style="font-family:var(--font-d);font-size:14px;font-weight:300;color:var(--ink);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></span>
-          <button class="cal-nav" onclick="weekShift(1)">›</button>
-        </div>
-        <div style="margin-top:8px;">
-          <select id="weekViewSelect" onchange="setWeekViewFromSelect(this.value)" style="width:100%;height:30px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface2);font-size:12px;font-family:var(--font-b);color:var(--ink2);padding:0 10px;outline:none;cursor:pointer;">
-            <option value="week">Week</option>
-            <option value="month">Month</option>
-          </select>
-        </div>
-      </div><!-- end .week-right -->
 
     </div><!-- end .week-layout -->
 
