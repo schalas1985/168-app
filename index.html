@@ -25,7 +25,7 @@ body { font-family:var(--font-b); background:var(--bg); color:var(--ink); min-he
 #view-week { max-width:100%; margin:0; }
 
 /* TOPBAR */
-.topbar { position:sticky; top:0; z-index:100; padding:12px 20px 10px; display:flex; align-items:center; justify-content:space-between; background:rgba(247,245,240,0.95); backdrop-filter:blur(20px); border-bottom:1px solid var(--border2); gap:10px; }
+.topbar { position:sticky; top:0; z-index:100; padding:12px 20px 10px; display:flex; align-items:center; justify-content:space-between; background:rgba(247,245,240,0.95); backdrop-filter:blur(20px); border-bottom:1px solid var(--border2); gap:10px; max-width:50vw; margin:0 auto; }
 .wordmark { font-family:var(--font-d); font-size:22px; font-weight:300; color:var(--ink); letter-spacing:0.08em; line-height:1; flex-shrink:0; }
 .wordmark span { color:var(--accent); font-style:italic; }
 .topbar-date { font-size:10px; color:var(--ink3); font-weight:300; letter-spacing:0.06em; }
@@ -36,7 +36,7 @@ body { font-family:var(--font-b); background:var(--bg); color:var(--ink); min-he
 
 
 /* NAV grouped layout */
-.nav { display:flex; gap:0; padding:0; overflow-x:auto; scrollbar-width:none; border-bottom:1px solid var(--border2); align-items:stretch; }
+.nav { display:flex; gap:0; padding:0; overflow-x:auto; scrollbar-width:none; border-bottom:1px solid var(--border2); align-items:stretch; max-width:50vw; margin:0 auto; }
 .nav::-webkit-scrollbar { display:none; }
 .nav-group { display:flex; gap:0; }
 .nav-group-left { margin-right:auto; padding-left:8px; }
@@ -605,15 +605,17 @@ input.field { height:42px; }
       <!-- CENTRE COLUMN: controls + grid -->
       <div class="week-center">
 
-        <!-- Controls: ‹ title › + dropdown, sitting above the grid -->
+        <!-- Controls: grouped tightly, pushed to right -->
         <div class="week-controls">
-          <button class="cal-nav" onclick="weekShift(-1)">‹</button>
-          <span id="weekRangeTitle" style="font-family:var(--font-d);font-size:16px;font-weight:300;color:var(--ink);flex:1;white-space:nowrap;"></span>
-          <button class="cal-nav" onclick="weekShift(1)">›</button>
-          <select id="weekViewSelect" onchange="setWeekViewFromSelect(this.value)" style="height:30px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface2);font-size:12px;font-family:var(--font-b);color:var(--ink2);padding:0 10px;outline:none;cursor:pointer;">
-            <option value="week">Week</option>
-            <option value="month">Month</option>
-          </select>
+          <div style="margin-left:auto;display:flex;align-items:center;gap:6px;">
+            <button class="cal-nav" onclick="weekShift(-1)">‹</button>
+            <span id="weekRangeTitle" style="font-family:var(--font-d);font-size:16px;font-weight:300;color:var(--ink);white-space:nowrap;padding:0 4px;"></span>
+            <button class="cal-nav" onclick="weekShift(1)">›</button>
+            <select id="weekViewSelect" onchange="setWeekViewFromSelect(this.value)" style="height:30px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface2);font-size:12px;font-family:var(--font-b);color:var(--ink2);padding:0 10px;outline:none;cursor:pointer;">
+              <option value="week">Week</option>
+              <option value="month">Month</option>
+            </select>
+          </div>
         </div>
 
         <!-- WEEK GRID -->
