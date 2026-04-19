@@ -319,9 +319,14 @@ input.field { height:42px; }
 .wt-cell { position:relative; }
 .wt-half-bottom { position:absolute; bottom:0; left:0; right:0; height:50%; cursor:pointer; }
 .wt-half-bottom:hover::after { content:":30"; position:absolute; bottom:2px; left:4px; font-size:9px; color:var(--ink3); }
-@media (min-width:700px) { .week-split { flex-direction:row-reverse; align-items:flex-start; } .week-main { flex:0 0 65%; } .week-side { flex:0 0 calc(35% - 14px); } }
-.week-main { min-width:0; }
-.week-side { min-width:0; }
+.week-layout { display:flex; gap:0; flex:1; min-height:0; }
+.upnext-col { width:25%; flex-shrink:0; display:flex; flex-direction:column; border-right:1px solid var(--border2); padding-right:14px; overflow-y:auto; }
+.upnext-col-title { font-size:9px; font-weight:500; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink3); margin-bottom:10px; flex-shrink:0; }
+.week-main { flex:1; min-width:0; display:flex; flex-direction:column; padding-left:14px; }
+.unbooked-item { display:flex; align-items:flex-start; gap:7px; padding:8px 0; border-bottom:1px solid var(--border2); font-size:12px; color:var(--ink2); font-weight:300; cursor:grab; }
+.unbooked-item:last-child { border-bottom:none; }
+.unbooked-item:active { cursor:grabbing; }
+.unbooked-item.dragging { opacity:0.4; }
 .week-view-opts { display:flex; gap:4px; }
 .wv-opt { padding:4px 10px; border-radius:6px; border:1px solid var(--border); background:transparent; font-size:11px; font-family:var(--font-b); color:var(--ink3); cursor:pointer; transition:all 0.15s; }
 .wv-opt.on { background:var(--ink); color:#fff; border-color:var(--ink); }
@@ -577,34 +582,40 @@ input.field { height:42px; }
       <span id="weekRangeTitle" style="font-family:var(--font-d);font-size:17px;font-weight:300;color:var(--ink);flex:1;text-align:center;white-space:nowrap;"></span>
       <button class="cal-nav" onclick="weekShift(1)">›</button>
     </div>
-    <!-- WEEK HEADER ROW 2: Up Next left | Pie centre | Dropdown right -->
-    <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:8px;flex-shrink:0;">
+    <!-- WEEK BODY: 25% Up Next left | 75% calendar right -->
+    <div class="week-layout">
 
-      <!-- LEFT: Up Next -->
-      <div style="flex:1;min-width:0;">
-        <div style="font-size:9px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:6px;">Up next</div>
-        <div id="unbookedList" style="font-size:12px;"></div>
+      <!-- LEFT COLUMN: Up Next -->
+      <div class="upnext-col">
+        <div class="upnext-col-title">Up next</div>
+        <div id="unbookedList"></div>
       </div>
 
-      <!-- CENTRE: Values pie -->
-      <div style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;">
-        <div style="font-size:9px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:6px;">Time by value</div>
-        <canvas id="valuePieChart" width="120" height="120"></canvas>
-      </div>
+      <!-- RIGHT COLUMN: pie + view + grid -->
+      <div class="week-main">
 
-      <!-- RIGHT: View dropdown -->
-      <div style="flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;padding-top:0;">
-        <div style="font-size:9px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:6px;">View</div>
-        <select id="weekViewSelect" onchange="setWeekViewFromSelect(this.value)" style="height:32px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface2);font-size:12px;font-family:var(--font-b);color:var(--ink2);padding:0 8px;outline:none;cursor:pointer;">
-          <option value="week">Week</option>
-          <option value="month">Month</option>
-        </select>
-      </div>
+        <!-- Pie centre | Dropdown right -->
+        <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:8px;flex-shrink:0;">
+          <div style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;">
+            <div style="font-size:9px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:6px;">Time by value</div>
+            <canvas id="valuePieChart" width="120" height="120"></canvas>
+          </div>
+          <div style="flex:1;"></div>
+          <div style="flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;">
+            <div style="font-size:9px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:6px;">View</div>
+            <select id="weekViewSelect" onchange="setWeekViewFromSelect(this.value)" style="height:32px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface2);font-size:12px;font-family:var(--font-b);color:var(--ink2);padding:0 8px;outline:none;cursor:pointer;">
+              <option value="week">Week</option>
+              <option value="month">Month</option>
+            </select>
+          </div>
+        </div>
 
-    </div>
+        <!-- WEEK GRID fills remaining space -->
+        <div id="weekGridWrap" style="flex:1;min-height:0;display:flex;flex-direction:column;"><!-- rendered by JS --></div>
 
-    <!-- WEEK GRID fills remaining space -->
-    <div id="weekGridWrap" style="flex:1;min-height:0;display:flex;flex-direction:column;"><!-- rendered by JS --></div>
+      </div><!-- end .week-main -->
+
+    </div><!-- end .week-layout -->
 
     <!-- MONTH FALLBACK -->
     <div id="monthGridWrap" style="display:none;flex:1;overflow-y:auto;">
@@ -1711,6 +1722,7 @@ function openTimeBlockFromUnbooked(id){
 
 // ══ DRAG AND DROP TIME BLOCKS ══
 let _dragBlockId = null;
+let _dragUpNextId = null;
 function dragBlockStart(e, id){
   _dragBlockId = id;
   e.target.classList.add('dragging');
@@ -1721,9 +1733,20 @@ function dragBlockEnd(e){
   document.querySelectorAll('.wt-cell.drag-over').forEach(c=>c.classList.remove('drag-over'));
   _dragBlockId = null;
 }
+function dragUpNextStart(e, id){
+  _dragUpNextId = id;
+  e.target.closest('.unbooked-item').classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'copy';
+}
+function dragUpNextEnd(e){
+  const el = e.target.closest('.unbooked-item');
+  if(el) el.classList.remove('dragging');
+  document.querySelectorAll('.wt-cell.drag-over').forEach(c=>c.classList.remove('drag-over'));
+  _dragUpNextId = null;
+}
 function dragOver(e){
   e.preventDefault();
-  e.dataTransfer.dropEffect = 'move';
+  e.dataTransfer.dropEffect = _dragUpNextId ? 'copy' : 'move';
   e.currentTarget.classList.add('drag-over');
 }
 function dragLeave(e){
@@ -1732,14 +1755,21 @@ function dragLeave(e){
 function dropBlock(e, ds, hour){
   e.preventDefault();
   e.currentTarget.classList.remove('drag-over');
-  if(!_dragBlockId) return;
-  const b = (S.timeBlocks||[]).find(t=>t.id===_dragBlockId);
-  if(!b) return;
-  // Detect if dropped in bottom half (30 min)
   const rect = e.currentTarget.getBoundingClientRect();
-  const relY = e.clientY - rect.top;
-  const minute = relY > rect.height / 2 ? 30 : 0;
-  b.date = ds; b.hour = hour; b.minute = minute;
+  const minute = (e.clientY - rect.top) > rect.height / 2 ? 30 : 0;
+  if(_dragUpNextId){
+    const item=(S.upNextQueue||[]).find(i=>i.id===_dragUpNextId); if(!item) return;
+    const block={id:'tb'+Date.now(),date:ds,hour,minute,label:item.text,duration:1,valueTag:'',domain:''};
+    S.timeBlocks=S.timeBlocks||[];
+    S.timeBlocks.push(block);
+    sv(); renderWeekGrid();
+    toast(`Blocked: ${item.text.slice(0,30)}${item.text.length>30?'…':''}`);
+    _dragUpNextId=null;
+    return;
+  }
+  if(!_dragBlockId) return;
+  const b=(S.timeBlocks||[]).find(t=>t.id===_dragBlockId); if(!b) return;
+  b.date=ds; b.hour=hour; b.minute=minute;
   sv(); renderWeekGrid(); toast(`Moved to ${String(hour).padStart(2,'0')}:${minute===30?'30':'00'}`);
 }
 
@@ -2568,22 +2598,26 @@ function renderWeekValSummary(){
 
 function renderUnbooked(){
   const list=document.getElementById('unbookedList'); if(!list) return;
-  // Up Next = ONLY items explicitly sent from project/area/resource cards via sendUpNextToWeek
   const upNextItems=(S.upNextQueue||[]).sort((a,b)=>(a.ts||0)-(b.ts||0));
   if(!upNextItems.length){
-    list.innerHTML=`<div style="font-size:11px;color:var(--ink3);font-style:italic;line-height:1.5;">Nothing yet.<br>Use "Send Up Next to Week" on a project card.</div>`;
+    list.innerHTML=`<div style="font-size:11px;color:var(--ink3);font-style:italic;line-height:1.6;">Nothing yet.<br>Use "Send Up Next to Week" on a project card.</div>`;
     return;
   }
-  list.innerHTML=upNextItems.slice(0,8).map(item=>{
-    const proj=item.projectRef?`<span style="font-size:10px;color:var(--blue);display:block;margin-top:1px;">${esc(item.projectRef)}</span>`:'';
-    return`<div style="padding:6px 0;border-bottom:1px solid var(--border2);display:flex;align-items:flex-start;gap:6px;cursor:pointer;" onclick="openTimeBlockFromUpNext('${item.id}')" title="Click to block time for this">
+  list.innerHTML=upNextItems.map(item=>{
+    const proj=item.projectRef?`<span style="font-size:10px;color:var(--accent);display:block;margin-top:2px;font-weight:300;">${esc(item.projectRef)}</span>`:'';
+    return`<div class="unbooked-item" draggable="true"
+      ondragstart="dragUpNextStart(event,'${item.id}')"
+      ondragend="dragUpNextEnd(event)"
+      onclick="openTimeBlockFromUpNext('${item.id}')"
+      title="Drag onto the calendar to block time">
+      <div style="font-size:13px;flex-shrink:0;color:var(--ink3);">⠿</div>
       <div style="flex:1;min-width:0;">
-        <div style="font-size:12px;color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(item.text)}</div>
+        <div style="font-size:12px;color:var(--ink2);line-height:1.4;">${esc(item.text)}</div>
         ${proj}
       </div>
-      <button onclick="event.stopPropagation();removeUpNext('${item.id}')" style="flex-shrink:0;background:none;border:none;color:var(--ink3);cursor:pointer;font-size:12px;padding:0 2px;" title="Remove">✕</button>
+      <button onclick="event.stopPropagation();removeUpNext('${item.id}')" style="flex-shrink:0;background:none;border:none;color:var(--ink3);cursor:pointer;font-size:11px;padding:0 2px;line-height:1;" title="Remove">✕</button>
     </div>`;
-  }).join('')+(upNextItems.length>8?`<div style="font-size:10px;color:var(--ink3);padding-top:3px;">+${upNextItems.length-8} more</div>`:'');
+  }).join('');
 }
 function openTimeBlockFromUpNext(id){
   const item=(S.upNextQueue||[]).find(i=>i.id===id); if(!item) return;
