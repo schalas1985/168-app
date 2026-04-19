@@ -657,50 +657,34 @@ input.field { height:42px; }
   <!-- ═══ INBOX ═══ -->
   <div class="view" id="view-inbox">
     <div class="card">
-      <!-- SINGLE FILTER ROW: All · Uncategorised · Action | Projects · Areas · Resources | experience types -->
-      <div style="display:flex;gap:4px;margin-bottom:12px;flex-wrap:wrap;align-items:center;">
-        <button class="inbox-filter on" onclick="filterInbox('all',this)">All</button>
-        <button class="inbox-filter" onclick="filterInbox('uncategorised',this)">Uncategorised</button>
-        <button class="inbox-filter" onclick="filterInbox('action',this)">Action</button>
-        <span style="width:1px;height:16px;background:var(--border);margin:0 2px;flex-shrink:0;"></span>
-        <button class="inbox-filter" onclick="filterInbox('project',this)">Projects</button>
-        <button class="inbox-filter" onclick="filterInbox('area',this)">Areas</button>
-        <button class="inbox-filter" onclick="filterInbox('resource',this)">Resources</button>
-        <span style="width:1px;height:16px;background:var(--border);margin:0 2px;flex-shrink:0;"></span>
-        <button class="inbox-filter" onclick="filterInbox('emotion',this)">Emotion</button>
-        <button class="inbox-filter" onclick="filterInbox('feeling',this)">Feeling</button>
-        <button class="inbox-filter" onclick="filterInbox('idea',this)">Idea</button>
-        <button class="inbox-filter" onclick="filterInbox('insight',this)">Insight</button>
-        <button class="inbox-filter" onclick="filterInbox('memory',this)">Memory</button>
-        <button class="inbox-filter" onclick="filterInbox('thought',this)">Thought</button>
+      <!-- CARD HEADER: title + filter toggle -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <span style="font-size:11px;font-weight:500;color:var(--ink2);letter-spacing:0.04em;">Inbox</span>
+        <button onclick="toggleInboxFilters()" id="inboxFilterToggle" title="Filter" style="background:none;border:1px solid var(--border);border-radius:8px;padding:4px 10px;font-size:11px;color:var(--ink3);cursor:pointer;display:flex;align-items:center;gap:5px;transition:all 0.15s;">
+          <span>&#9776;</span><span id="inboxFilterLabel">Filter</span>
+        </button>
+      </div>
+      <!-- COLLAPSIBLE FILTER PILLS -->
+      <div id="inboxFiltersPanel" style="display:none;margin-bottom:12px;">
+        <div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center;">
+          <button class="inbox-filter on" onclick="filterInbox('all',this)">All</button>
+          <button class="inbox-filter" onclick="filterInbox('uncategorised',this)">Uncategorised</button>
+          <button class="inbox-filter" onclick="filterInbox('action',this)">Action</button>
+          <span style="width:1px;height:16px;background:var(--border);margin:0 2px;flex-shrink:0;"></span>
+          <button class="inbox-filter" onclick="filterInbox('project',this)">Projects</button>
+          <button class="inbox-filter" onclick="filterInbox('area',this)">Areas</button>
+          <button class="inbox-filter" onclick="filterInbox('resource',this)">Resources</button>
+          <span style="width:1px;height:16px;background:var(--border);margin:0 2px;flex-shrink:0;"></span>
+          <button class="inbox-filter" onclick="filterInbox('emotion',this)">Emotion</button>
+          <button class="inbox-filter" onclick="filterInbox('feeling',this)">Feeling</button>
+          <button class="inbox-filter" onclick="filterInbox('idea',this)">Idea</button>
+          <button class="inbox-filter" onclick="filterInbox('insight',this)">Insight</button>
+          <button class="inbox-filter" onclick="filterInbox('memory',this)">Memory</button>
+          <button class="inbox-filter" onclick="filterInbox('thought',this)">Thought</button>
+        </div>
       </div>
 
       <div id="inboxList"></div>
-
-      <!-- INPUT ROW: type dropdown · text box · mic · return -->
-      <div style="display:flex;gap:7px;margin-top:12px;align-items:flex-start;">
-        <select id="inboxTypeSelect" style="height:42px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface2);font-size:11px;font-family:var(--font-b);color:var(--ink3);padding:0 6px;outline:none;cursor:pointer;flex-shrink:0;max-width:110px;">
-          <option value="uncategorised" selected>Type...</option>
-          <option value="action">Action</option>
-          <option disabled>───────</option>
-          <option value="emotion">Emotion</option>
-          <option value="feeling">Feeling</option>
-          <option value="idea">Idea</option>
-          <option value="insight">Insight</option>
-          <option value="memory">Memory</option>
-          <option value="thought">Thought</option>
-          <option disabled>───────</option>
-          <option value="project">Project</option>
-          <option value="area">Area</option>
-          <option value="resource">Resource</option>
-        </select>
-        <div style="flex:1;">
-          <input type="text" id="inboxIn" placeholder="What's happening?" onkeydown="if(event.key==='Enter')addInbox()" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;font-size:13px;font-family:var(--font-b);color:var(--ink);outline:none;">
-          <div class="voice-status" id="voiceStatus"></div>
-        </div>
-        <button class="add-btn-icon" id="inboxMicBtn" onclick="toggleVoiceInbox()" title="Voice" style="width:42px;height:42px;">&#127897;</button>
-        <button class="add-btn-send" onclick="addInbox()" title="Add" style="width:42px;height:42px;font-size:18px;">&#9166;</button>
-      </div>
     </div>
   </div>
 
@@ -901,7 +885,7 @@ input.field { height:42px; }
     <p style="font-size:12px;color:var(--ink2);line-height:1.8;font-weight:300;"><strong style="font-weight:500;">Project, Area, Resource</strong> → tap "→ Maps" to go to that section.</p>
   </div>
 </div>
-<button id="inboxHelpBtn" onclick="toggleInboxHelp()" title="How the inbox works" style="display:none;position:fixed;bottom:78px;right:78px;z-index:199;width:34px;height:34px;border-radius:50%;border:1.5px solid var(--border);background:var(--surface);color:var(--ink3);font-size:13px;font-weight:500;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.08);">?</button>
+<button id="inboxHelpBtn" onclick="toggleInboxHelp()" title="How the inbox works" style="display:none;position:fixed;bottom:78px;right:20px;z-index:199;width:34px;height:34px;border-radius:50%;border:1.5px solid var(--border);background:var(--surface);color:var(--ink3);font-size:13px;font-weight:500;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.08);align-items:center;justify-content:center;">?</button>
 
 <!-- TIME BLOCK MODAL -->
 <div id="timeBlockModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:500;align-items:center;justify-content:center;padding:20px;" onclick="if(event.target===this)closeTimeBlockModal()">
@@ -1529,6 +1513,16 @@ function filterInbox(f,el){
   el.classList.add('on'); renderInbox();
 }
 function toggleInboxHelp(){ const o=document.getElementById('inboxHelpOverlay'); o.style.display=o.style.display==='flex'?'none':'flex'; }
+function toggleInboxFilters(){
+  const panel=document.getElementById('inboxFiltersPanel');
+  const label=document.getElementById('inboxFilterLabel');
+  const btn=document.getElementById('inboxFilterToggle');
+  const open=panel.style.display==='none';
+  panel.style.display=open?'block':'none';
+  label.textContent=open?'Done':'Filter';
+  btn.style.borderColor=open?'var(--accent)':'var(--border)';
+  btn.style.color=open?'var(--accent)':'var(--ink3)';
+}
 function closeInboxHelp(){ document.getElementById('inboxHelpOverlay').style.display='none'; }
 
 function renderInbox(){
