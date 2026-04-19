@@ -26,13 +26,12 @@ body { font-family:var(--font-b); background:var(--bg); color:var(--ink); min-he
 .topbar { position:sticky; top:0; z-index:100; padding:12px 20px 10px; display:flex; align-items:center; justify-content:space-between; background:rgba(247,245,240,0.95); backdrop-filter:blur(20px); border-bottom:1px solid var(--border2); gap:10px; }
 .wordmark { font-family:var(--font-d); font-size:22px; font-weight:300; color:var(--ink); letter-spacing:0.08em; line-height:1; flex-shrink:0; }
 .wordmark span { color:var(--accent); font-style:italic; }
-.topbar-center { display:flex; flex-direction:column; align-items:center; flex:1; }
 .topbar-date { font-size:10px; color:var(--ink3); font-weight:300; letter-spacing:0.06em; }
-.topbar-tw { display:flex; align-items:center; gap:5px; }
-.topbar-time { font-size:15px; font-family:var(--font-d); color:var(--ink2); font-weight:300; }
+.topbar-time { font-size:14px; font-family:var(--font-d); color:var(--ink2); font-weight:300; }
 .topbar-weather { font-size:11px; color:var(--ink3); font-weight:300; }
 .profile-btn { width:30px; height:30px; border-radius:50%; background:var(--accent2); border:1px solid rgba(45,106,79,0.2); display:flex; align-items:center; justify-content:center; cursor:pointer; font-family:var(--font-d); font-size:14px; color:var(--accent); transition:all 0.15s; flex-shrink:0; }
 .profile-btn:hover { background:var(--accent); color:#fff; }
+
 
 /* NAV grouped layout */
 .nav { display:flex; gap:0; padding:0; overflow-x:auto; scrollbar-width:none; border-bottom:1px solid var(--border2); align-items:stretch; }
@@ -456,15 +455,13 @@ input.field { height:42px; }
   <!-- TOPBAR -->
   <div class="topbar">
     <div class="wordmark">com<span>pass</span></div>
-    <div class="topbar-center">
-      <div class="topbar-date" id="topDate"></div>
-      <div class="topbar-tw">
-        <div class="topbar-time" id="topTime"></div>
-        <div class="topbar-weather" id="topWeather"></div>
-      </div>
+    <div style="flex:1;"></div>
+    <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+      <div id="topDate" class="topbar-date"></div>
+      <div id="topTime" class="topbar-time"></div>
+      <div id="topWeather" class="topbar-weather"></div>
+      <button class="profile-btn" id="profileBtn" onclick="openProfile()">S</button>
     </div>
-    <button onclick="openTrash()" title="Trash" style="width:30px;height:30px;border-radius:50%;border:1px solid var(--border);background:transparent;color:var(--ink3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;transition:all 0.15s;" onmouseover="this.style.color='var(--warm)'" onmouseout="this.style.color='var(--ink3)'">&#128465;</button>
-    <button class="profile-btn" id="profileBtn" onclick="openProfile()">S</button>
   </div>
 
   <!-- NAV -->
@@ -1000,7 +997,7 @@ input.field { height:42px; }
       <p style="font-size:11px;color:var(--ink3);font-weight:300;line-height:1.6;padding-top:6px;">A space for the work that holds the work. Coming in a future build.</p>
     </div>
 
-    <div class="pp-section">
+    <div class="pp-section" id="trashSection">
       <div class="pp-section-title">Trash</div>
       <div id="trashList"><p style="font-size:12px;color:var(--ink3);font-weight:300;">Trash is empty.</p></div>
       <button onclick="emptyTrash()" style="margin-top:8px;width:100%;padding:8px;border:1px solid rgba(154,61,26,0.25);border-radius:var(--radius-sm);background:var(--warm2);font-size:12px;color:var(--warm);cursor:pointer;font-family:var(--font-b);">Empty trash</button>
@@ -1017,6 +1014,7 @@ input.field { height:42px; }
       <div class="pp-menu-item"><div class="pp-menu-icon">🔒</div><span class="pp-menu-label">Security</span><span class="pp-menu-arrow">›</span></div>
       <div class="pp-menu-item"><div class="pp-menu-icon">💳</div><span class="pp-menu-label">Billing</span><span class="pp-menu-arrow">›</span></div>
       <div class="pp-menu-item"><div class="pp-menu-icon">🎨</div><span class="pp-menu-label">Preferences</span><span class="pp-menu-arrow">›</span></div>
+      <div class="pp-menu-item" onclick="renderTrash();document.getElementById('trashSection').scrollIntoView({behavior:'smooth',block:'start'});" style="cursor:pointer;"><div class="pp-menu-icon">🗑</div><span class="pp-menu-label">Trash</span><span class="pp-menu-arrow">›</span></div>
       <div class="pp-menu-item" onclick="exportData()" style="cursor:pointer;"><div class="pp-menu-icon">📤</div><span class="pp-menu-label">Export my data</span><span class="pp-menu-arrow">›</span></div>
       <div class="pp-menu-item" onclick="document.getElementById('importFileInput').click()" style="cursor:pointer;"><div class="pp-menu-icon">📥</div><span class="pp-menu-label">Import data</span><span class="pp-menu-arrow">›</span></div>
       <input type="file" id="importFileInput" accept=".json" style="display:none;" onchange="importData(event)">
