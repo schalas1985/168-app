@@ -2798,20 +2798,30 @@ function closeFeaturesPage(){
 function renderFeaturesPage(){
   const list=document.getElementById('featuresPageList'); if(!list) return;
   const features=(S.features||[]).slice().reverse();
-  const statusLabel={live:'🟢 Live',progress:'🟡 In progress',planned:'🔴 Planned',idea:'⚪ Idea'};
   if(!features.length){
     list.innerHTML='<p style="color:var(--ink3);font-size:13px;font-weight:300;">No features logged yet.</p>'; return;
   }
   list.innerHTML=features.map(f=>{
     const d=f.added?new Date(f.added):null;
-    const dateStr=d?d.toLocaleDateString('en-ZA',{day:'numeric',month:'short',year:'numeric'})+' '+d.toLocaleTimeString('en-ZA',{hour:'2-digit',minute:'2-digit'}):'';
-    return`<div class="toolbox-feature" style="padding:12px 0;flex-direction:column;align-items:flex-start;gap:4px;">
-      <div style="display:flex;align-items:center;gap:8px;width:100%;">
-        <span class="toolbox-feature-name" style="font-size:13px;">${esc(f.name)}</span>
-        <span class="toolbox-status ${f.status}" style="font-size:11px;">${statusLabel[f.status]||f.status}</span>
-        <button onclick="deleteFeature('${f.id}')" style="background:none;border:none;color:var(--ink3);cursor:pointer;font-size:12px;padding:0 4px;margin-left:auto;">✕</button>
+    const dateStr=d?d.toLocaleDateString('en-ZA',{day:'numeric',month:'short',year:'numeric'}):'';
+    const timeStr=d?d.toLocaleTimeString('en-ZA',{hour:'2-digit',minute:'2-digit'}):'';
+    return`<div class="toolbox-feature" style="padding:14px 0;display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--border2);">
+      <!-- Left: date + time -->
+      <div style="flex-shrink:0;min-width:90px;text-align:right;">
+        <div style="font-size:11px;color:var(--ink3);font-weight:300;">${dateStr}</div>
+        <div style="font-size:10px;color:var(--ink3);font-weight:300;opacity:0.7;">${timeStr}</div>
       </div>
-      ${dateStr?`<span style="font-size:10px;color:var(--ink3);font-weight:300;">${dateStr}</span>`:''}
+      <!-- Middle: status selector -->
+      <select onchange="updateFeatureStatus('${f.id}',this.value)" style="flex-shrink:0;height:26px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);font-size:11px;font-family:var(--font-b);color:var(--ink2);padding:0 6px;outline:none;cursor:pointer;">
+        <option value="idea"    ${f.status==='idea'    ?'selected':''}>⚪ Idea</option>
+        <option value="planned" ${f.status==='planned' ?'selected':''}>🔴 Planned</option>
+        <option value="progress"${f.status==='progress'?'selected':''}>🟡 In progress</option>
+        <option value="live"    ${f.status==='live'    ?'selected':''}>🟢 Live</option>
+      </select>
+      <!-- Right: feature name -->
+      <span style="flex:1;font-size:13px;color:var(--ink2);font-weight:300;">${esc(f.name)}</span>
+      <!-- Delete with confirmation -->
+      <button onclick="deleteFeature('${f.id}')" style="flex-shrink:0;background:none;border:none;color:var(--ink3);cursor:pointer;font-size:13px;padding:0 4px;" title="Delete">✕</button>
     </div>`;
   }).join('');
 }
@@ -2825,10 +2835,19 @@ function addFeature(){
   closeQuickAdd();
   toast('Feature added');
 }
+function updateFeatureStatus(id,status){
+  const f=(S.features||[]).find(f=>f.id===id); if(!f) return;
+  f.status=status;
+  localStorage.setItem('cp_features',JSON.stringify(S.features));
+  toast('Status updated');
+}
 function deleteFeature(id){
-  S.features=(S.features||[]).filter(f=>f.id!==id);
+  const f=(S.features||[]).find(f=>f.id===id); if(!f) return;
+  if(!confirm(`Delete "${f.name}"? This cannot be undone.`)) return;
+  S.features=S.features.filter(f=>f.id!==id);
   localStorage.setItem('cp_features',JSON.stringify(S.features));
   renderFeaturesPage();
+  toast('Deleted');
 }
 
 init();
