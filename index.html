@@ -2806,11 +2806,8 @@ function renderFeaturesPage(){
     const dateStr=d?d.toLocaleDateString('en-ZA',{day:'numeric',month:'short',year:'numeric'}):'';
     const timeStr=d?d.toLocaleTimeString('en-ZA',{hour:'2-digit',minute:'2-digit'}):'';
     return`<div class="toolbox-feature" style="padding:14px 0;display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--border2);">
-      <!-- Left: date + time -->
-      <div style="flex-shrink:0;min-width:90px;text-align:right;">
-        <div style="font-size:11px;color:var(--ink3);font-weight:300;">${dateStr}</div>
-        <div style="font-size:10px;color:var(--ink3);font-weight:300;opacity:0.7;">${timeStr}</div>
-      </div>
+      <!-- Left: date + time on one line -->
+      <div style="flex-shrink:0;min-width:120px;font-size:11px;color:var(--ink3);font-weight:300;white-space:nowrap;">${dateStr} ${timeStr}</div>
       <!-- Middle: status selector -->
       <select onchange="updateFeatureStatus('${f.id}',this.value)" style="flex-shrink:0;height:26px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);font-size:11px;font-family:var(--font-b);color:var(--ink2);padding:0 6px;outline:none;cursor:pointer;">
         <option value="idea"    ${f.status==='idea'    ?'selected':''}>⚪ Idea</option>
