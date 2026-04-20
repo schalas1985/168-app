@@ -325,6 +325,8 @@ input.field { height:42px; }
 .upnext-col { width:25%; flex-shrink:0; display:flex; flex-direction:column; border-right:1px solid var(--border2); padding-right:14px; overflow-y:auto; }
 .upnext-col-title { font-size:9px; font-weight:500; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink3); margin-bottom:10px; flex-shrink:0; }
 .week-center { width:50%; flex-shrink:0; display:flex; flex-direction:column; border-right:1px solid var(--border2); padding:0 16px; min-height:0; }
+.day-layout { display:flex; gap:0; }
+.day-main { flex:1; min-width:0; }
 .week-right { width:25%; flex-shrink:0; padding-left:20px; display:flex; flex-direction:column; }
 .week-controls { display:flex; align-items:center; gap:8px; margin-bottom:10px; flex-shrink:0; }
 .week-pie-row { display:flex; gap:20px; margin-bottom:12px; flex-shrink:0; }
@@ -519,6 +521,14 @@ input.field { height:42px; }
 
   <!-- ═══ MY DAY ═══ -->
   <div class="view active" id="view-today">
+    <div class="day-layout">
+
+    <div class="upnext-col">
+      <div class="upnext-col-title">Up next</div>
+      <div id="unbookedListDay"></div>
+    </div>
+
+    <div class="day-main">
     <div class="inner-tabs">
       <button class="inner-tab active" onclick="switchInner('morning')">Morning</button>
       <button class="inner-tab" onclick="switchInner('evening')">Evening</button>
@@ -593,6 +603,8 @@ input.field { height:42px; }
       </div>
       <button class="btn btn-primary" onclick="saveEvening()">Close the day</button>
     </div>
+    </div><!-- end .day-main -->
+    </div><!-- end .day-layout -->
   </div>
 
   <!-- ═══ MY WEEK ═══ -->
@@ -2670,13 +2682,9 @@ function renderWeekValSummary(){
 }
 
 function renderUnbooked(){
-  const list=document.getElementById('unbookedList'); if(!list) return;
   const upNextItems=(S.upNextQueue||[]).sort((a,b)=>(a.ts||0)-(b.ts||0));
-  if(!upNextItems.length){
-    list.innerHTML=`<div style="font-size:11px;color:var(--ink3);font-style:italic;line-height:1.6;">Nothing yet.<br>Use "Send Up Next to Week" on a project card.</div>`;
-    return;
-  }
-  list.innerHTML=upNextItems.map(item=>{
+  const empty=`<div style="font-size:11px;color:var(--ink3);font-style:italic;line-height:1.6;">Nothing yet.<br>Use "Send Up Next to Week" on a project card.</div>`;
+  const html=upNextItems.map(item=>{
     const proj=item.projectRef?`<span style="font-size:10px;color:var(--accent);display:block;margin-top:2px;font-weight:300;">${esc(item.projectRef)}</span>`:'';
     return`<div class="unbooked-item" draggable="true"
       ondragstart="dragUpNextStart(event,'${item.id}')"
@@ -2691,6 +2699,10 @@ function renderUnbooked(){
       <button onclick="event.stopPropagation();removeUpNext('${item.id}')" style="flex-shrink:0;background:none;border:none;color:var(--ink3);cursor:pointer;font-size:11px;padding:0 2px;line-height:1;" title="Remove">✕</button>
     </div>`;
   }).join('');
+  ['unbookedList','unbookedListDay'].forEach(id=>{
+    const el=document.getElementById(id); if(!el) return;
+    el.innerHTML=upNextItems.length?html:empty;
+  });
 }
 function openTimeBlockFromUpNext(id){
   const item=(S.upNextQueue||[]).find(i=>i.id===id); if(!item) return;
