@@ -469,6 +469,7 @@ input.field { height:42px; }
 .toolbox-status.live { background:#e6f4ec; color:var(--accent); }
 .toolbox-status.progress { background:#fef9e6; color:#8A6A1A; }
 .toolbox-status.planned { background:#fdf0ee; color:var(--warm); }
+.toolbox-status.idea { background:#f0f0ee; color:#888; }
 .toolbox-add { padding:10px 16px 14px; border-top:1px solid var(--border2); flex-shrink:0; display:flex; flex-direction:column; gap:6px; }
 .toolbox-add input { width:100%; padding:7px 10px; border:1px solid var(--border); border-radius:var(--radius-sm); font-size:12px; font-family:var(--font-b); color:var(--ink); background:var(--surface2); outline:none; box-sizing:border-box; }
 .toolbox-add-row { display:flex; gap:6px; }
@@ -987,6 +988,7 @@ input.field { height:42px; }
         <option value="live">🟢 Live</option>
         <option value="progress">🟡 In progress</option>
         <option value="planned">🔴 Planned</option>
+        <option value="idea">⚪ Idea</option>
       </select>
       <button onclick="addFeature()" style="padding:0 18px;height:34px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);font-size:12px;font-family:var(--font-b);cursor:pointer;">Save</button>
       <button onclick="closeQuickAdd()" style="padding:0 12px;height:34px;background:transparent;color:var(--ink3);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:12px;cursor:pointer;">Cancel</button>
@@ -2795,16 +2797,22 @@ function closeFeaturesPage(){
 function renderFeaturesPage(){
   const list=document.getElementById('featuresPageList'); if(!list) return;
   const features=(S.features||[]).slice().reverse();
-  const statusLabel={live:'🟢 Live',progress:'🟡 In progress',planned:'🔴 Planned'};
+  const statusLabel={live:'🟢 Live',progress:'🟡 In progress',planned:'🔴 Planned',idea:'⚪ Idea'};
   if(!features.length){
     list.innerHTML='<p style="color:var(--ink3);font-size:13px;font-weight:300;">No features logged yet.</p>'; return;
   }
-  list.innerHTML=features.map(f=>`
-    <div class="toolbox-feature" style="padding:12px 0;">
-      <span class="toolbox-feature-name" style="font-size:13px;">${esc(f.name)}</span>
-      <span class="toolbox-status ${f.status}" style="font-size:11px;">${statusLabel[f.status]||f.status}</span>
-      <button onclick="deleteFeature('${f.id}')" style="background:none;border:none;color:var(--ink3);cursor:pointer;font-size:12px;padding:0 4px;">✕</button>
-    </div>`).join('');
+  list.innerHTML=features.map(f=>{
+    const d=f.added?new Date(f.added):null;
+    const dateStr=d?d.toLocaleDateString('en-ZA',{day:'numeric',month:'short',year:'numeric'})+' '+d.toLocaleTimeString('en-ZA',{hour:'2-digit',minute:'2-digit'}):'';
+    return`<div class="toolbox-feature" style="padding:12px 0;flex-direction:column;align-items:flex-start;gap:4px;">
+      <div style="display:flex;align-items:center;gap:8px;width:100%;">
+        <span class="toolbox-feature-name" style="font-size:13px;">${esc(f.name)}</span>
+        <span class="toolbox-status ${f.status}" style="font-size:11px;">${statusLabel[f.status]||f.status}</span>
+        <button onclick="deleteFeature('${f.id}')" style="background:none;border:none;color:var(--ink3);cursor:pointer;font-size:12px;padding:0 4px;margin-left:auto;">✕</button>
+      </div>
+      ${dateStr?`<span style="font-size:10px;color:var(--ink3);font-weight:300;">${dateStr}</span>`:''}
+    </div>`;
+  }).join('');
 }
 function addFeature(){
   const input=document.getElementById('featureInput');
