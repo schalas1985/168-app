@@ -455,6 +455,26 @@ input.field { height:42px; }
 .plus-btn:hover { transform:scale(1.07); }
 .plus-btn:active { transform:scale(0.95); }
 
+/* TOOLBOX */
+.toolbox-btn { position:fixed; bottom:20px; left:20px; z-index:200; background:none; border:none; font-size:26px; cursor:pointer; opacity:0.18; transition:opacity 0.25s; line-height:1; padding:0; }
+.toolbox-btn:hover { opacity:0.9; }
+.toolbox-panel { position:fixed; bottom:64px; left:20px; z-index:300; width:340px; max-height:70vh; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); box-shadow:0 8px 32px rgba(0,0,0,0.14); display:flex; flex-direction:column; overflow:hidden; }
+.toolbox-header { padding:14px 16px 10px; border-bottom:1px solid var(--border2); display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+.toolbox-header-title { font-family:var(--font-d); font-size:15px; font-weight:300; color:var(--ink); }
+.toolbox-body { flex:1; overflow-y:auto; padding:10px 16px; }
+.toolbox-feature { display:flex; align-items:center; gap:8px; padding:7px 0; border-bottom:1px solid var(--border2); font-size:12px; color:var(--ink2); font-weight:300; }
+.toolbox-feature:last-child { border-bottom:none; }
+.toolbox-feature-name { flex:1; }
+.toolbox-status { font-size:11px; padding:2px 8px; border-radius:10px; font-weight:400; flex-shrink:0; }
+.toolbox-status.live { background:#e6f4ec; color:var(--accent); }
+.toolbox-status.progress { background:#fef9e6; color:#8A6A1A; }
+.toolbox-status.planned { background:#fdf0ee; color:var(--warm); }
+.toolbox-add { padding:10px 16px 14px; border-top:1px solid var(--border2); flex-shrink:0; display:flex; flex-direction:column; gap:6px; }
+.toolbox-add input { width:100%; padding:7px 10px; border:1px solid var(--border); border-radius:var(--radius-sm); font-size:12px; font-family:var(--font-b); color:var(--ink); background:var(--surface2); outline:none; box-sizing:border-box; }
+.toolbox-add-row { display:flex; gap:6px; }
+.toolbox-add select { flex:1; height:30px; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--surface2); font-size:11px; font-family:var(--font-b); color:var(--ink2); padding:0 8px; outline:none; cursor:pointer; }
+.toolbox-add-btn { height:30px; padding:0 14px; background:var(--accent); color:#fff; border:none; border-radius:var(--radius-sm); font-size:12px; font-family:var(--font-b); cursor:pointer; flex-shrink:0; }
+
 /* TOAST */
 .toast { position:fixed; bottom:80px; left:50%; transform:translateX(-50%) translateY(10px); background:var(--ink); color:var(--bg); padding:8px 16px; border-radius:20px; font-size:12px; opacity:0; transition:all 0.22s; pointer-events:none; z-index:400; white-space:nowrap; }
 .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
@@ -944,6 +964,27 @@ input.field { height:42px; }
 
 <button class="plus-btn" onclick="openCapture()">+</button>
 
+<!-- TOOLBOX — developer feature tracker -->
+<button class="toolbox-btn" id="toolboxBtn" onclick="toggleToolbox()" title="Live features">🧰</button>
+<div class="toolbox-panel hidden" id="toolboxPanel">
+  <div class="toolbox-header">
+    <span class="toolbox-header-title">Live Features</span>
+    <button onclick="toggleToolbox()" style="background:none;border:none;font-size:16px;color:var(--ink3);cursor:pointer;">✕</button>
+  </div>
+  <div class="toolbox-body" id="featuresList"></div>
+  <div class="toolbox-add">
+    <input id="featureInput" placeholder="Feature name..." onkeydown="if(event.key==='Enter')addFeature()">
+    <div class="toolbox-add-row">
+      <select id="featureStatusSelect">
+        <option value="live">🟢 Live</option>
+        <option value="progress">🟡 In progress</option>
+        <option value="planned">🔴 Planned</option>
+      </select>
+      <button class="toolbox-add-btn" onclick="addFeature()">Add</button>
+    </div>
+  </div>
+</div>
+
 <!-- CAPTURE -->
 <div class="capture-overlay hidden" id="captureOverlay">
   <div class="capture-sheet">
@@ -1104,6 +1145,7 @@ const S = {
   trash:     JSON.parse(localStorage.getItem('cp_trash')||'[]'),
   timeBlocks:JSON.parse(localStorage.getItem('cp_timeblocks')||'[]'),
   domainTags:JSON.parse(localStorage.getItem('cp_domaintags')||'["Work","Health","Family","Movement","Rest","Learning","Community"]'),
+  features:JSON.parse(localStorage.getItem('cp_features')||'[]'),
 };
 const VAL_COLORS=['#2D6A4F','#8A6A1A','#9A3D1A','#1A5F8A','#5A3F9A','#6B7A2D','#7A3D6B','#2D6A6A'];
 const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -2698,6 +2740,43 @@ function todayKey(){ return new Date().toISOString().slice(0,10); }
 function fmtDate(s){ const d=new Date(s+'T00:00:00'); return d.toLocaleDateString('en-ZA',{weekday:'short',day:'numeric',month:'short'}); }
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2400); }
+
+// ══ TOOLBOX ══
+function toggleToolbox(){
+  const panel=document.getElementById('toolboxPanel');
+  const isHidden=panel.classList.contains('hidden');
+  panel.classList.toggle('hidden');
+  if(isHidden) renderFeatures();
+}
+function renderFeatures(){
+  const list=document.getElementById('featuresList'); if(!list) return;
+  const features=S.features||[];
+  if(!features.length){
+    list.innerHTML='<p style="font-size:12px;color:var(--ink3);font-weight:300;padding:8px 0;">No features yet. Add the first one below.</p>';
+    return;
+  }
+  const statusLabel={live:'Live',progress:'In progress',planned:'Planned'};
+  list.innerHTML=features.slice().reverse().map(f=>`
+    <div class="toolbox-feature">
+      <span class="toolbox-feature-name">${esc(f.name)}</span>
+      <span class="toolbox-status ${f.status}">${statusLabel[f.status]||f.status}</span>
+      <button onclick="deleteFeature('${f.id}')" style="background:none;border:none;color:var(--ink3);cursor:pointer;font-size:11px;padding:0 2px;">✕</button>
+    </div>`).join('');
+}
+function addFeature(){
+  const input=document.getElementById('featureInput');
+  const name=input.value.trim(); if(!name) return;
+  const status=document.getElementById('featureStatusSelect').value;
+  S.features=S.features||[];
+  S.features.push({id:'ft'+Date.now(),name,status,added:Date.now()});
+  localStorage.setItem('cp_features',JSON.stringify(S.features));
+  input.value=''; renderFeatures();
+}
+function deleteFeature(id){
+  S.features=(S.features||[]).filter(f=>f.id!==id);
+  localStorage.setItem('cp_features',JSON.stringify(S.features));
+  renderFeatures();
+}
 
 init();
 </script>
