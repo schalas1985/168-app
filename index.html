@@ -331,8 +331,11 @@ input.field { height:42px; }
 .upnext-col { width:25%; flex-shrink:0; display:flex; flex-direction:column; border-right:1px solid var(--border2); padding-right:14px; overflow-y:auto; }
 .upnext-col-title { font-size:9px; font-weight:500; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink3); margin-bottom:10px; flex-shrink:0; }
 .week-center { width:50%; flex-shrink:0; display:flex; flex-direction:column; border-right:1px solid var(--border2); padding:0 16px; min-height:0; }
-.day-layout { display:flex; gap:0; }
-.day-main { flex:1; min-width:0; padding-left:20px; max-width:680px; }
+.day-layout { display:flex; gap:0; min-height:calc(100vh - 100px); }
+.day-main { flex:1; min-width:0; padding:20px 24px; max-width:700px; }
+#view-today { padding:0; }
+#view-today .upnext-col { min-width:200px; width:220px; padding:20px 14px; }
+body.dragging-block .event-block { pointer-events:none; }
 .upnext-add { display:flex; gap:6px; margin-bottom:10px; }
 .upnext-add input { flex:1; padding:5px 8px; border:1px solid var(--border); border-radius:var(--radius-sm); font-size:12px; font-family:var(--font-b); color:var(--ink); background:var(--surface2); outline:none; }
 .upnext-add button { padding:0 10px; height:28px; background:var(--accent); color:#fff; border:none; border-radius:var(--radius-sm); font-size:14px; cursor:pointer; line-height:1; }
@@ -494,6 +497,7 @@ input.field { height:42px; }
 .empty { text-align:center; padding:28px 16px; color:var(--ink3); font-size:13px; line-height:1.7; font-weight:300; }
 .empty-icon { font-family:var(--font-d); font-size:24px; color:var(--ink4); margin-bottom:8px; font-style:italic; }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>
 <body>
 <div class="app">
@@ -537,6 +541,7 @@ input.field { height:42px; }
 
     <div class="upnext-col">
       <div class="upnext-col-title">Up next</div>
+      <div id="dayHoursBooked" style="font-size:10px;color:var(--ink3);font-weight:300;margin-bottom:8px;"></div>
       <div class="upnext-add">
         <input id="upNextInputDay" type="text" placeholder="Add item..." onkeydown="if(event.key==='Enter')addUpNextItem('upNextInputDay')">
         <button onclick="addUpNextItem('upNextInputDay')">+</button>
@@ -1136,15 +1141,53 @@ input.field { height:42px; }
 function ld(k){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):null; }catch(e){ return null; } }
 function sv(){
   try{
-    localStorage.setItem('cp_entries', JSON.stringify(S.entries));
-    localStorage.setItem('cp_inbox',   JSON.stringify(S.inbox));
-    localStorage.setItem('cp_projects',JSON.stringify(S.projects));
-    localStorage.setItem('cp_values',  JSON.stringify(S.values));
-    localStorage.setItem('cp_captures',JSON.stringify(S.captures));
-    localStorage.setItem('cp_profile', JSON.stringify(S.profile||{}));
+    localStorage.setItem('cp_entries',    JSON.stringify(S.entries));
+    localStorage.setItem('cp_inbox',      JSON.stringify(S.inbox));
+    localStorage.setItem('cp_projects',   JSON.stringify(S.projects));
+    localStorage.setItem('cp_values',     JSON.stringify(S.values));
+    localStorage.setItem('cp_captures',   JSON.stringify(S.captures));
+    localStorage.setItem('cp_profile',    JSON.stringify(S.profile||{}));
     localStorage.setItem('cp_timeblocks', JSON.stringify(S.timeBlocks||[]));
     localStorage.setItem('cp_domaintags', JSON.stringify(S.domainTags||[]));
+    localStorage.setItem('cp_upnext',     JSON.stringify(S.upNextQueue||[]));
+    localStorage.setItem('cp_features',   JSON.stringify(S.features||[]));
+    ['entries','inbox','projects','values','captures','profile','timeBlocks','domainTags','upNextQueue','features'].forEach(k=>_sbSync(k));
   }catch(e){ console.warn('Compass save error:',e); }
+}
+
+// ══ SUPABASE SYNC ══
+const _SB_URL='https://xdsxhfqaovhnoohyvmzw.supabase.co';
+const _SB_KEY='sb_publishable_DkGtlQvWyz8uMeko-gT5zg_ytPYaZJV';
+let _sb=null;
+const _SB_MAP={entries:'entries',inbox:'inbox',projects:'projects',values:'values',captures:'captures',profile:'profile',timeBlocks:'timeblocks',domainTags:'domaintags',upNextQueue:'upnext',features:'features'};
+
+function initSupabase(){
+  try{
+    if(window.supabase){
+      _sb=window.supabase.createClient(_SB_URL,_SB_KEY);
+      loadFromSupabase();
+    }
+  }catch(e){ console.warn('Supabase init:',e); }
+}
+async function loadFromSupabase(){
+  if(!_sb) return;
+  try{
+    const {data,error}=await _sb.from('compass_sync').select('key,data');
+    if(error){ console.warn('Supabase read:',error.message); return; }
+    (data||[]).forEach(row=>{
+      const sKey=Object.keys(_SB_MAP).find(k=>_SB_MAP[k]===row.key);
+      if(sKey){ S[sKey]=row.data; localStorage.setItem('cp_'+row.key,JSON.stringify(row.data)); }
+    });
+    buildCommits(); renderInbox(); renderProjects(); renderValues();
+    renderWeekGrid(); renderInsights(); renderStreak(); renderJournal(); renderUnbooked();
+    toast('Synced ☁');
+  }catch(e){ console.warn('Supabase load:',e); }
+}
+async function _sbSync(stateKey){
+  if(!_sb) return;
+  const sbKey=_SB_MAP[stateKey]; if(!sbKey) return;
+  try{ await _sb.from('compass_sync').upsert({key:sbKey,data:S[stateKey],updated_at:new Date().toISOString()},{onConflict:'key'}); }
+  catch(e){ console.warn('Supabase write:',e); }
 }
 
 // ══ MIGRATION ══
@@ -1202,6 +1245,7 @@ const S = {
   timeBlocks:JSON.parse(localStorage.getItem('cp_timeblocks')||'[]'),
   domainTags:JSON.parse(localStorage.getItem('cp_domaintags')||'["Work","Health","Family","Movement","Rest","Learning","Community"]'),
   features:JSON.parse(localStorage.getItem('cp_features')||'[]'),
+  upNextQueue:JSON.parse(localStorage.getItem('cp_upnext')||'[]'),
 };
 const VAL_COLORS=['#2D6A4F','#8A6A1A','#9A3D1A','#1A5F8A','#5A3F9A','#6B7A2D','#7A3D6B','#2D6A6A'];
 const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -1230,10 +1274,17 @@ function init(){
   buildCommits(); addOcItem();
   renderInbox(); renderProjects(); renderValues();
   renderWeekGrid(); renderInsights(); renderStreak();
-  renderJournal(); renderUnbooked();
+  renderJournal(); renderUnbooked(); renderDayHoursBooked();
   const p=S.profile;
   if(p?.name) document.getElementById('profileBtn').textContent=p.name.charAt(0).toUpperCase();
   fetchWeather();
+  initSupabase();
+}
+function renderDayHoursBooked(){
+  const el=document.getElementById('dayHoursBooked'); if(!el) return;
+  const dk=todayKey();
+  const total=(S.timeBlocks||[]).filter(b=>b.date===dk).reduce((s,b)=>s+(b.duration||1),0);
+  el.textContent=total>0?`${total}h booked today`:'';
 }
 function tick(){
   const n=new Date();
@@ -1808,13 +1859,13 @@ function saveTimeBlock(){
   } else {
     S.timeBlocks.push({id:Date.now(),date:ds,hour,minute:minute||0,duration:dur,label,valueTag:valTag,domain,group,created:new Date().toISOString()});
   }
-  sv(); closeTimeBlockModal(); renderWeekGrid(); toast('Block saved');
+  sv(); closeTimeBlockModal(); renderWeekGrid(); renderDayHoursBooked(); toast('Block saved');
 }
 function deleteTimeBlock(){
   const editId = parseInt(document.getElementById('tbEditId').value)||0;
   if(!editId) return;
   S.timeBlocks = (S.timeBlocks||[]).filter(t=>t.id!==editId);
-  sv(); closeTimeBlockModal(); renderWeekGrid(); toast('Block removed');
+  sv(); closeTimeBlockModal(); renderWeekGrid(); renderDayHoursBooked(); toast('Block removed');
 }
 function closeTimeBlockModal(){ document.getElementById('timeBlockModal').style.display='none'; }
 
@@ -1860,10 +1911,12 @@ function endBlockResize(){
 function dragBlockStart(e, id){
   if(e.target.classList.contains('block-resize-handle')){ e.preventDefault(); return; }
   _dragBlockId = id;
+  document.body.classList.add('dragging-block');
   e.target.closest('.event-block')?.classList.add('dragging');
   e.dataTransfer.effectAllowed = 'move';
 }
 function dragBlockEnd(e){
+  document.body.classList.remove('dragging-block');
   e.target.closest('.event-block')?.classList.remove('dragging');
   document.querySelectorAll('.wt-cell.drag-over').forEach(c=>c.classList.remove('drag-over'));
   _dragBlockId = null;
@@ -2847,7 +2900,7 @@ function forceMigration(){
 }
 
 // ══ UTILS ══
-function todayKey(){ return new Date().toISOString().slice(0,10); }
+function todayKey(){ const n=new Date(); return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`; }
 function fmtDate(s){ const d=new Date(s+'T00:00:00'); return d.toLocaleDateString('en-ZA',{weekday:'short',day:'numeric',month:'short'}); }
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2400); }
