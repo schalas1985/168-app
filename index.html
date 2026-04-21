@@ -2216,6 +2216,7 @@ function sendUpNextToWeek(i){
   if(exists){toast('Already in your week queue');return;}
   S.upNextQueue.push({id:'un'+Date.now(),text:p.upNext,projectRef:p.name,ts:Date.now()});
   localStorage.setItem('cp_upnext',JSON.stringify(S.upNextQueue));
+  _sbSync('upNextQueue');
   renderUnbooked(); toast('Sent to Week — Up Next');
 }
 function deleteProject(i){ if(confirm('Delete this project?')){ S.projects.splice(i,1); sv(); renderProjects(); } }
@@ -2837,12 +2838,14 @@ function addUpNextItem(inputId){
   S.upNextQueue=S.upNextQueue||[];
   S.upNextQueue.push({id:'un'+Date.now(),text:txt,ts:Date.now()});
   localStorage.setItem('cp_upnext',JSON.stringify(S.upNextQueue));
+  _sbSync('upNextQueue');
   inp.value='';
   renderUnbooked();
 }
 function removeUpNext(id){
   S.upNextQueue=(S.upNextQueue||[]).filter(i=>i.id!==id);
   localStorage.setItem('cp_upnext',JSON.stringify(S.upNextQueue));
+  _sbSync('upNextQueue');
   renderUnbooked(); toast('Removed from Up Next');
 }
 
@@ -2971,6 +2974,7 @@ function addFeature(){
   S.features=S.features||[];
   S.features.push({id:'ft'+Date.now(),name,status,added:Date.now()});
   localStorage.setItem('cp_features',JSON.stringify(S.features));
+  _sbSync('features');
   closeQuickAdd();
   toast('Feature added');
 }
@@ -2978,6 +2982,7 @@ function updateFeatureStatus(id,status){
   const f=(S.features||[]).find(f=>f.id===id); if(!f) return;
   f.status=status;
   localStorage.setItem('cp_features',JSON.stringify(S.features));
+  _sbSync('features');
   toast('Status updated');
 }
 function deleteFeature(id){
@@ -2985,6 +2990,7 @@ function deleteFeature(id){
   if(!confirm(`Delete "${f.name}"? This cannot be undone.`)) return;
   S.features=S.features.filter(f=>f.id!==id);
   localStorage.setItem('cp_features',JSON.stringify(S.features));
+  _sbSync('features');
   renderFeaturesPage();
   toast('Deleted');
 }
