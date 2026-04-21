@@ -317,6 +317,11 @@ input.field { height:42px; }
 .event-block[draggable="true"] { cursor:grab; }
 .event-block[draggable="true"]:active { cursor:grabbing; opacity:0.7; }
 .event-block.dragging { opacity:0.4; border:2px dashed currentColor; }
+.block-resize-handle { position:absolute; bottom:0; left:0; right:0; height:8px; cursor:ns-resize; display:flex; align-items:flex-end; justify-content:center; padding-bottom:1px; }
+.block-resize-handle::after { content:''; width:18px; height:2px; background:currentColor; opacity:0; border-radius:1px; transition:opacity 0.15s; }
+.event-block:hover .block-resize-handle::after { opacity:0.35; }
+.topbar-date-wrap { display:flex; flex-direction:column; align-items:flex-end; line-height:1.2; }
+.topbar-countdown { font-size:9px; color:var(--ink4); font-weight:300; letter-spacing:0.03em; }
 .wt-cell.drag-over { background:var(--accent2); border:1px dashed var(--accent); }
 /* 30-min cell halves */
 .wt-cell { position:relative; }
@@ -497,7 +502,10 @@ input.field { height:42px; }
     <div class="wordmark">com<span>pass</span></div>
     <div style="flex:1;"></div>
     <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
-      <div id="topDate" class="topbar-date"></div>
+      <div class="topbar-date-wrap">
+        <div id="topDate" class="topbar-date"></div>
+        <div id="topCountdown" class="topbar-countdown"></div>
+      </div>
       <div id="topTime" class="topbar-time"></div>
       <div id="topWeather" class="topbar-weather"></div>
       <button class="profile-btn" id="profileBtn" onclick="openProfile()">S</button>
@@ -977,6 +985,7 @@ input.field { height:42px; }
         </select>
       </div>
     </div>
+    <div class="form-row" style="margin-bottom:14px;"><div class="form-label">Cluster (optional)</div><input class="field" id="tbGroup" placeholder="e.g. App work, Portfolio"></div>
     <input type="hidden" id="tbDate">
     <input type="hidden" id="tbHour">
     <input type="hidden" id="tbEditId" value="">
@@ -1230,6 +1239,11 @@ function tick(){
   const n=new Date();
   document.getElementById('topDate').textContent=`${DAYS_LONG[n.getDay()]}, ${n.getDate()} ${MONTHS[n.getMonth()]}`;
   document.getElementById('topTime').textContent=n.toLocaleTimeString('en-ZA',{hour:'2-digit',minute:'2-digit'});
+  const secLeft=(24*3600)-(n.getHours()*3600+n.getMinutes()*60+n.getSeconds());
+  const hLeft=Math.floor(secLeft/3600);
+  const mLeft=Math.floor((secLeft%3600)/60);
+  const cd=document.getElementById('topCountdown');
+  if(cd) cd.textContent=`${hLeft}h ${mLeft}m left`;
 }
 
 // ══ NAV ══
@@ -1752,6 +1766,7 @@ function openTimeBlockModal(ds, hour, minute){
   document.getElementById('tbDuration').value = '1';
   if(document.getElementById('tbMinute')) document.getElementById('tbMinute').value = minute;
   document.getElementById('tbDeleteBtn').style.display = 'none';
+  if(document.getElementById('tbGroup')) document.getElementById('tbGroup').value = '';
   document.getElementById('tbModalTitle').textContent = `Block time — ${fmtDate(ds)} ${String(hour).padStart(2,'0')}:${minute===30?'30':'00'}`;
   // Populate value and domain dropdowns
   const vSel = document.getElementById('tbValue');
@@ -1771,6 +1786,7 @@ function editTimeBlock(id){
   if(document.getElementById('tbMinute')) document.getElementById('tbMinute').value = b.minute||0;
   document.getElementById('tbValue').value = b.valueTag||'';
   document.getElementById('tbDomain').value = b.domain||'';
+  if(document.getElementById('tbGroup')) document.getElementById('tbGroup').value = b.group||'';
   document.getElementById('tbDeleteBtn').style.display = 'block';
   document.getElementById('tbModalTitle').textContent = 'Edit time block';
 }
@@ -1783,13 +1799,14 @@ function saveTimeBlock(){
   const dur   = parseFloat(document.getElementById('tbDuration').value)||1;
   const valTag = document.getElementById('tbValue').value;
   const domain = document.getElementById('tbDomain').value;
+  const group  = (document.getElementById('tbGroup')?.value||'').trim();
   const editId = parseInt(document.getElementById('tbEditId').value)||0;
   if(!S.timeBlocks) S.timeBlocks=[];
   if(editId){
     const b = S.timeBlocks.find(t=>t.id===editId);
-    if(b) Object.assign(b,{label,duration:dur,minute,valueTag:valTag,domain});
+    if(b) Object.assign(b,{label,duration:dur,minute,valueTag:valTag,domain,group});
   } else {
-    S.timeBlocks.push({id:Date.now(),date:ds,hour,minute:minute||0,duration:dur,label,valueTag:valTag,domain,created:new Date().toISOString()});
+    S.timeBlocks.push({id:Date.now(),date:ds,hour,minute:minute||0,duration:dur,label,valueTag:valTag,domain,group,created:new Date().toISOString()});
   }
   sv(); closeTimeBlockModal(); renderWeekGrid(); toast('Block saved');
 }
@@ -1814,13 +1831,40 @@ function openTimeBlockFromUnbooked(id){
 // ══ DRAG AND DROP TIME BLOCKS ══
 let _dragBlockId = null;
 let _dragUpNextId = null;
+
+// ── Block resize ──
+let _resizeBlockId=null, _resizeStartY=null, _resizeStartDur=null;
+function startBlockResize(e, id){
+  e.preventDefault(); e.stopPropagation();
+  _resizeBlockId=id;
+  _resizeStartY=e.clientY;
+  const b=(S.timeBlocks||[]).find(t=>t.id===id);
+  _resizeStartDur=b?(b.duration||1):1;
+  document.addEventListener('mousemove',onBlockResize);
+  document.addEventListener('mouseup',endBlockResize);
+}
+function onBlockResize(e){
+  if(!_resizeBlockId) return;
+  const dy=e.clientY-_resizeStartY;
+  const newDur=Math.max(0.25,Math.round((_resizeStartDur+dy/48)*4)/4);
+  const b=(S.timeBlocks||[]).find(t=>t.id===_resizeBlockId);
+  if(b){ b.duration=newDur; renderWeekGrid(); }
+}
+function endBlockResize(){
+  if(_resizeBlockId) sv();
+  _resizeBlockId=null; _resizeStartY=null; _resizeStartDur=null;
+  document.removeEventListener('mousemove',onBlockResize);
+  document.removeEventListener('mouseup',endBlockResize);
+}
+
 function dragBlockStart(e, id){
+  if(e.target.classList.contains('block-resize-handle')){ e.preventDefault(); return; }
   _dragBlockId = id;
-  e.target.classList.add('dragging');
+  e.target.closest('.event-block')?.classList.add('dragging');
   e.dataTransfer.effectAllowed = 'move';
 }
 function dragBlockEnd(e){
-  e.target.classList.remove('dragging');
+  e.target.closest('.event-block')?.classList.remove('dragging');
   document.querySelectorAll('.wt-cell.drag-over').forEach(c=>c.classList.remove('drag-over'));
   _dragBlockId = null;
 }
@@ -2532,7 +2576,18 @@ function renderWeekGrid(){
       blocks.forEach(b=>{
         const val = b.valueTag ? S.values.find(v=>v.name===b.valueTag) : null;
         const col = val ? val.color : '#888780';
-        eventBlocks += `<div class="event-block" style="background:${col}22;color:${col};top:3px;height:${Math.max(19,(b.duration||1)*46-4)}px;cursor:pointer;" onclick="event.stopPropagation();editTimeBlock(${b.id})">${esc(b.label||'Block')}${b.domain?' · '+esc(b.domain):''}</div>`;
+        const topPx = (b.minute||0)/60*48 + 3;
+        const heightPx = Math.max(22,(b.duration||1)*48-6);
+        const groupBar = b.group ? `<div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:currentColor;opacity:0.5;border-radius:5px 0 0 5px;"></div>` : '';
+        const groupLabel = b.group ? `<span style="font-size:9px;opacity:0.55;display:block;margin-top:1px;padding-left:${b.group?'5px':'0'};">◆ ${esc(b.group)}</span>` : '';
+        eventBlocks += `<div class="event-block" draggable="true"
+          ondragstart="dragBlockStart(event,${b.id})"
+          ondragend="dragBlockEnd(event)"
+          style="background:${col}22;color:${col};top:${topPx}px;height:${heightPx}px;"
+          onclick="event.stopPropagation();editTimeBlock(${b.id})">
+          ${groupBar}<div style="padding-left:${b.group?'6px':'0'};overflow:hidden;">${esc(b.label||'Block')}${b.domain?`<span style="opacity:0.6;"> · ${esc(b.domain)}</span>`:''}${groupLabel}</div>
+          <div class="block-resize-handle" onmousedown="startBlockResize(event,${b.id})"></div>
+        </div>`;
       });
       // 30-min click zones
       const cellClick30 = `onclick="openTimeBlockModal('${ds}',${hour},0)"`;
