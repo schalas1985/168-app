@@ -332,7 +332,8 @@ input.field { height:42px; }
 .upnext-col-title { font-size:9px; font-weight:500; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink3); margin-bottom:10px; flex-shrink:0; }
 .week-center { width:50%; flex-shrink:0; display:flex; flex-direction:column; border-right:1px solid var(--border2); padding:0 16px; min-height:0; }
 .day-layout { display:flex; gap:0; min-height:calc(100vh - 100px); }
-.day-main { flex:1; min-width:0; padding:20px 24px; max-width:700px; }
+.day-main { flex:1; min-width:0; overflow-y:auto; display:flex; flex-direction:column; align-items:center; padding-top:20px; }
+.day-main > * { width:100%; max-width:580px; }
 #view-today { padding:0; }
 #view-today .upnext-col { min-width:200px; width:220px; padding:20px 14px; }
 body.dragging-block .event-block { pointer-events:none; }
